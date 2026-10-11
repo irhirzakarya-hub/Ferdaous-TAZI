@@ -490,20 +490,21 @@ export default function AdminPage() {
           style={{
             maxWidth: "960px",
             margin: "0 auto",
-            padding: "12px 16px",
+            padding: "10px 14px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            gap: "8px",
           }}
         >
           {/* Logo & Status */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0, flex: 1 }}>
             <Link
               href="/"
               target="_blank"
               style={{
-                width: "38px",
-                height: "38px",
+                width: "36px",
+                height: "36px",
                 borderRadius: "12px",
                 backgroundColor: "rgba(15, 23, 42, 0.8)",
                 border: "1px solid rgba(255, 255, 255, 0.1)",
@@ -512,81 +513,68 @@ export default function AdminPage() {
                 justifyContent: "center",
                 color: "#60a5fa",
                 textDecoration: "none",
-                transition: "all 0.2s",
+                flexShrink: 0,
               }}
-              title="معاينة الصفحة الحية في نافذة جديدة"
+              title="معاينة الصفحة الحية"
             >
-              <Eye style={{ width: 18, height: 18 }} />
+              <Eye style={{ width: 17, height: 17 }} />
             </Link>
 
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <span style={{ fontSize: "15px", fontWeight: 900, color: "#ffffff" }}>
-                  لوحة التحكم الذكية
+            <div style={{ minWidth: 0, overflow: "hidden" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                <span style={{ fontSize: "14px", fontWeight: 900, color: "#ffffff", whiteSpace: "nowrap" }}>
+                  لوحة التحكم
                 </span>
-                <InstagramVerifiedBadge size={16} />
+                <InstagramVerifiedBadge size={15} />
               </div>
-              <span style={{ fontSize: "11px", color: "#fbbf24", fontWeight: 700 }}>
+              <span style={{ fontSize: "11px", color: "#fbbf24", fontWeight: 700, display: "block", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
                 {profile.businessName.ar}
               </span>
             </div>
           </div>
 
           {/* Quick Header Actions */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <button
-              onClick={handleDownloadJson}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "8px 14px",
-                borderRadius: "14px",
-                backgroundColor: "rgba(15, 23, 42, 0.8)",
-                border: "1px solid rgba(255, 255, 255, 0.08)",
-                color: "#94a3b8",
-                fontSize: "12px",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              <Download style={{ width: 14, height: 14, color: "#60a5fa" }} />
-              <span className="hidden sm:inline">تحميل JSON</span>
-            </button>
-
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
+            {/* Quick Save button */}
             <button
               id="admin-save-btn"
               onClick={() => handleSaveProfile()}
               disabled={saving}
               className="btn-nfc-vcard shimmer-effect"
               style={{
-                padding: "8px 16px",
-                fontSize: "12.5px",
+                padding: "7px 14px",
+                fontSize: "12px",
                 width: "auto",
-                borderRadius: "14px",
+                borderRadius: "12px",
+                flexShrink: 0,
               }}
             >
-              <Save style={{ width: 15, height: 15 }} />
-              <span>{saving ? "جاري الحفظ..." : "حفظ التغييرات"}</span>
+              <Save style={{ width: 14, height: 14 }} />
+              <span>{saving ? "..." : "حفظ"}</span>
             </button>
 
+            {/* Logout Button (Prominent, labeled, and guaranteed visible on mobile) */}
             <button
+              id="admin-logout-btn"
               onClick={handleLogout}
               style={{
-                width: "36px",
-                height: "36px",
-                borderRadius: "12px",
-                backgroundColor: "rgba(244, 63, 94, 0.12)",
-                border: "1px solid rgba(244, 63, 94, 0.25)",
-                display: "flex",
+                display: "inline-flex",
                 alignItems: "center",
-                justifyContent: "center",
-                color: "#f43f5e",
+                gap: "5px",
+                padding: "7px 12px",
+                borderRadius: "12px",
+                backgroundColor: "rgba(244, 63, 94, 0.18)",
+                border: "1.5px solid rgba(244, 63, 94, 0.5)",
+                color: "#fda4af",
+                fontSize: "12px",
+                fontWeight: 800,
                 cursor: "pointer",
+                flexShrink: 0,
               }}
-              title="قفل وتسجيل الخروج"
+              title="تسجيل الخروج وقفل اللوحة"
             >
-              <LogOut style={{ width: 16, height: 16 }} />
+              <LogOut style={{ width: 15, height: 15, color: "#f43f5e" }} />
+              <span>خروج</span>
             </button>
           </div>
         </div>
@@ -1368,7 +1356,7 @@ export default function AdminPage() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: "12px",
+            gap: "8px",
           }}
         >
           <Link
@@ -1378,18 +1366,19 @@ export default function AdminPage() {
               display: "inline-flex",
               alignItems: "center",
               gap: "6px",
-              padding: "12px 18px",
+              padding: "12px 14px",
               borderRadius: "18px",
               backgroundColor: "rgba(15, 23, 42, 0.8)",
               border: "1px solid rgba(255, 255, 255, 0.1)",
               color: "#60a5fa",
-              fontSize: "13px",
+              fontSize: "12.5px",
               fontWeight: 800,
               textDecoration: "none",
+              flexShrink: 0,
             }}
           >
             <Eye style={{ width: 16, height: 16 }} />
-            <span>معاينة البطاقة الحية</span>
+            <span className="hidden sm:inline">معاينة البطاقة</span>
           </Link>
 
           <button
@@ -1400,12 +1389,35 @@ export default function AdminPage() {
             style={{
               flex: 1,
               maxWidth: "460px",
-              padding: "13px 20px",
-              fontSize: "14px",
+              padding: "13px 16px",
+              fontSize: "13.5px",
             }}
           >
             <Save style={{ width: 17, height: 17 }} />
-            <span>{saving ? "جاري الحفظ..." : "حفظ جميع التغييرات الآن ✓"}</span>
+            <span>{saving ? "جاري الحفظ..." : "حفظ جميع التغييرات ✓"}</span>
+          </button>
+
+          <button
+            onClick={handleLogout}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "5px",
+              padding: "12px 14px",
+              borderRadius: "18px",
+              backgroundColor: "rgba(244, 63, 94, 0.16)",
+              border: "1.5px solid rgba(244, 63, 94, 0.5)",
+              color: "#fda4af",
+              fontSize: "12.5px",
+              fontWeight: 800,
+              cursor: "pointer",
+              flexShrink: 0,
+            }}
+            title="تسجيل الخروج وقفل اللوحة"
+          >
+            <LogOut style={{ width: 16, height: 16, color: "#f43f5e" }} />
+            <span className="hidden sm:inline">خروج</span>
           </button>
         </div>
       </div>
