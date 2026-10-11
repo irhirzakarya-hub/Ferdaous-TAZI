@@ -116,8 +116,8 @@ export default function AdminPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const correctPin = profile.adminPin || "2026";
-    if (pinInput.trim() === correctPin || pinInput.trim() === "2026") {
+    const correctPin = (profile.adminPin && profile.adminPin.trim()) || "2026";
+    if (pinInput.trim() === correctPin) {
       setIsAuthenticated(true);
       setPinError(false);
       sessionStorage.setItem("bilal_admin_auth", "true");
@@ -312,7 +312,7 @@ export default function AdminPage() {
           <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <div style={{ textAlign: "right" }}>
               <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
-                أدخل الرمز السري (PIN الافتراضي: 2026)
+                أدخل الرمز السري للمسؤول (PIN)
               </label>
               <div style={{ position: "relative" }}>
                 <input
@@ -365,7 +365,7 @@ export default function AdminPage() {
                   fontWeight: 700,
                 }}
               >
-                الرمز السري غير صحيح، يرجى المحاولة مجدداً (الرمز: 2026).
+                الرمز السري غير صحيح، يرجى إدخال الرمز السري الصحيح للمتابعة.
               </div>
             )}
 
