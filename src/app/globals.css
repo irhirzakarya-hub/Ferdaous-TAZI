@@ -1,0 +1,736 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   Bilal Electronique - Ultra Luxury NFC Digital Card Design System
+   Tailored for Mobile Devices & Smartphones (iOS / Android)
+   ========================================================================== */
+
+:root {
+  --font-cairo: "Cairo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-outfit: "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  
+  /* Color Palette */
+  --bg-dark: #050814;
+  --bg-card: rgba(13, 20, 44, 0.75);
+  --bg-card-hover: rgba(19, 29, 64, 0.85);
+  --border-glass: rgba(255, 255, 255, 0.09);
+  --border-gold: rgba(245, 158, 11, 0.35);
+  --border-blue: rgba(59, 130, 246, 0.35);
+  
+  --primary-blue: #1d4ed8;
+  --primary-blue-glow: rgba(29, 78, 216, 0.45);
+  --gold-amber: #f59e0b;
+  --gold-glow: rgba(245, 158, 11, 0.4);
+  --whatsapp-green: #10b981;
+  --whatsapp-glow: rgba(16, 185, 129, 0.4);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background-color: var(--bg-dark);
+  color: #f8fafc;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-cairo);
+  background-color: var(--bg-dark);
+  color: #f1f5f9;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+[dir="ltr"] {
+  font-family: var(--font-outfit), var(--font-cairo);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #070b1a;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e3a8a;
+  border-radius: 10px;
+}
+
+/* ==========================================================================
+   Mobile-First Layout Container
+   ========================================================================== */
+.nfc-page-wrapper {
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  padding-bottom: 100px;
+  background: radial-gradient(circle at 50% 0%, #101c44 0%, #060a1a 60%, #040610 100%);
+}
+
+.nfc-mobile-container {
+  width: 100%;
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+/* ==========================================================================
+   Luxury Glassmorphism & Cards
+   ========================================================================== */
+.luxury-card {
+  background: linear-gradient(160deg, rgba(16, 24, 52, 0.85) 0%, rgba(9, 14, 32, 0.9) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass);
+  border-radius: 24px;
+  box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.luxury-card:hover {
+  border-color: rgba(245, 158, 11, 0.25);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.75), 0 0 25px -5px rgba(245, 158, 11, 0.15);
+}
+
+.luxury-card-gold {
+  background: linear-gradient(145deg, rgba(245, 158, 11, 0.1) 0%, rgba(13, 20, 44, 0.9) 100%);
+  border: 1px solid var(--border-gold);
+  border-radius: 20px;
+  box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.15);
+}
+
+/* ==========================================================================
+   The Dedicated Mobile Poster Frame (ايطار الصورة المطور)
+   ========================================================================== */
+.poster-lux-frame {
+  position: relative;
+  width: 100%;
+  border-radius: 26px;
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.3) 0%, rgba(15, 23, 42, 0.9) 100%);
+  padding: 8px;
+  border: 1.5px solid rgba(245, 158, 11, 0.35);
+  box-shadow: 
+    0 20px 50px -10px rgba(0, 0, 0, 0.8),
+    0 0 35px -5px rgba(29, 78, 216, 0.35),
+    inset 0 0 20px rgba(245, 158, 11, 0.1);
+  overflow: hidden;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.poster-lux-frame:hover {
+  transform: translateY(-3px);
+  box-shadow: 
+    0 25px 60px -10px rgba(0, 0, 0, 0.9),
+    0 0 45px 0px rgba(245, 158, 11, 0.3);
+  border-color: rgba(245, 158, 11, 0.6);
+}
+
+.poster-img-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1.05;
+  max-height: 420px;
+  border-radius: 20px;
+  overflow: hidden;
+  background-color: #030712;
+}
+
+.poster-floating-badge-top {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 30px;
+  background: rgba(10, 15, 35, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.poster-floating-badge-bottom {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-radius: 16px;
+  background: rgba(5, 10, 26, 0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.zoom-pill-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #60a5fa;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(37, 99, 235, 0.2);
+  padding: 5px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.zoom-pill-btn:hover {
+  background: rgba(37, 99, 235, 0.35);
+  color: #93c5fd;
+}
+
+/* ==========================================================================
+   High-Impact NFC Action Buttons
+   ========================================================================== */
+.btn-nfc-vcard {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 15px 20px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #d97706 100%);
+  color: #0c1222;
+  font-size: 15px;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  animation: vcardPulse 3.2s ease-in-out infinite;
+}
+
+.btn-nfc-vcard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px -4px rgba(245, 158, 11, 0.7);
+}
+
+.btn-nfc-vcard:active {
+  transform: scale(0.96) !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.btn-nfc-whatsapp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 16px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  transition: all 0.25s ease;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  animation: whatsappAura 2.8s ease-in-out infinite;
+}
+
+.btn-nfc-whatsapp:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px -3px rgba(16, 185, 129, 0.6);
+}
+
+.btn-nfc-whatsapp:active {
+  transform: scale(0.96) !important;
+}
+
+.btn-nfc-call {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 16px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  transition: all 0.25s ease;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  animation: phoneAura 2.8s ease-in-out infinite;
+}
+
+.btn-nfc-call:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px -3px rgba(37, 99, 235, 0.6);
+}
+
+.btn-nfc-call:active {
+  transform: scale(0.96) !important;
+}
+
+/* ==========================================================================
+   2x2 Trust Badges Grid (Designed specifically for Mobile)
+   ========================================================================== */
+.trust-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.trust-card-item {
+  background: linear-gradient(145deg, rgba(16, 24, 52, 0.75) 0%, rgba(10, 16, 38, 0.85) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 20px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 110px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s ease;
+}
+
+.trust-card-item:hover {
+  border-color: rgba(245, 158, 11, 0.3);
+  transform: translateY(-2px);
+  background: linear-gradient(145deg, rgba(22, 34, 72, 0.85) 0%, rgba(13, 21, 48, 0.95) 100%);
+}
+
+.trust-icon-box {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+/* ==========================================================================
+   Delivery Bar with Animated Moving Truck
+   ========================================================================== */
+.delivery-lux-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(15, 23, 42, 0.85) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  box-shadow: 0 8px 20px -5px rgba(245, 158, 11, 0.15);
+}
+
+.delivery-truck-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(245, 158, 11, 0.18);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fbbf24;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Product Category Cards & List
+   ========================================================================== */
+.cat-pill {
+  padding: 8px 14px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.7);
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cat-pill.active {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  border-color: #3b82f6;
+  box-shadow: 0 4px 15px -2px rgba(37, 99, 235, 0.5);
+}
+
+.product-row-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: rgba(10, 16, 38, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+
+.product-row-item:hover {
+  background: rgba(18, 28, 62, 0.85);
+  border-color: rgba(59, 130, 246, 0.25);
+}
+
+.order-mini-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 10px;
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.order-mini-pill:hover {
+  background: rgba(16, 185, 129, 0.3);
+  color: #6ee7b7;
+}
+
+/* ==========================================================================
+   Sticky Bottom Dock for Mobile Navigation
+   ========================================================================== */
+.mobile-bottom-dock {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding: 10px 16px;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  background: linear-gradient(to top, #040714 80%, rgba(4, 7, 20, 0.95) 90%, transparent 100%);
+  pointer-events: none;
+}
+
+.dock-content {
+  max-width: 440px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+/* ==========================================================================
+   Animations & Micro-interactions
+   ========================================================================== */
+@keyframes truckBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.truck-bounce {
+  animation: truckBounce 1.8s ease-in-out infinite;
+}
+
+@keyframes radarWave {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.radar-dot {
+  animation: radarWave 2s infinite;
+}
+
+@keyframes shimmerWave {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.shimmer-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-effect::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    transparent 100%
+  );
+  animation: shimmerWave 2.8s infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+.ambient-glow {
+  animation: pulseGlow 6s ease-in-out infinite alternate;
+}
+
+/* ==========================================================================
+   Action Buttons Animations
+   ========================================================================== */
+@keyframes vcardPulse {
+  0%, 100% {
+    box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.5), 0 0 0 0 rgba(245, 158, 11, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 14px 32px -4px rgba(245, 158, 11, 0.75), 0 0 20px 2px rgba(245, 158, 11, 0.4);
+    transform: scale(1.018);
+  }
+}
+
+@keyframes whatsappAura {
+  0%, 100% {
+    box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.4), 0 0 0 0 rgba(16, 185, 129, 0.4);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+  50% {
+    box-shadow: 0 12px 28px -2px rgba(16, 185, 129, 0.65), 0 0 18px 2px rgba(16, 185, 129, 0.45);
+    border-color: rgba(52, 211, 153, 0.55);
+  }
+}
+
+@keyframes phoneAura {
+  0%, 100% {
+    box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.4), 0 0 0 0 rgba(37, 99, 235, 0.4);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+  50% {
+    box-shadow: 0 12px 28px -2px rgba(37, 99, 235, 0.65), 0 0 18px 2px rgba(37, 99, 235, 0.45);
+    border-color: rgba(96, 165, 250, 0.55);
+  }
+}
+
+/* Icon micro animations */
+@keyframes whatsappWobble {
+  0%, 75%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  80% {
+    transform: scale(1.22) rotate(-14deg);
+  }
+  85% {
+    transform: scale(1.22) rotate(14deg);
+  }
+  90% {
+    transform: scale(1.15) rotate(-10deg);
+  }
+  95% {
+    transform: scale(1.08) rotate(6deg);
+  }
+}
+
+.anim-icon-whatsapp {
+  display: inline-block;
+  transform-origin: center center;
+  animation: whatsappWobble 3.2s ease-in-out infinite;
+}
+
+@keyframes phoneRing {
+  0%, 75%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  78% {
+    transform: scale(1.2) rotate(-16deg);
+  }
+  82% {
+    transform: scale(1.2) rotate(16deg);
+  }
+  86% {
+    transform: scale(1.2) rotate(-16deg);
+  }
+  90% {
+    transform: scale(1.2) rotate(16deg);
+  }
+  94% {
+    transform: scale(1.08) rotate(0deg);
+  }
+}
+
+.anim-icon-phone {
+  display: inline-block;
+  transform-origin: center center;
+  animation: phoneRing 3.2s ease-in-out infinite;
+}
+
+@keyframes userPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.18);
+  }
+}
+
+.anim-icon-user {
+  display: inline-block;
+  transform-origin: center center;
+  animation: userPulse 2.5s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   Admin Luxury Dashboard & Vault Styling (Matching Main Identity)
+   ========================================================================== */
+.admin-page-bg {
+  min-height: 100vh;
+  background-color: #050814;
+  color: #f1f5f9;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.admin-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background-color: rgba(5, 8, 20, 0.92);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-card {
+  background: linear-gradient(145deg, rgba(16, 24, 52, 0.75) 0%, rgba(10, 16, 38, 0.88) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.06);
+}
+
+.admin-vault-box {
+  background: linear-gradient(160deg, rgba(15, 23, 42, 0.88) 0%, rgba(10, 15, 35, 0.96) 100%);
+  border: 1.5px solid rgba(245, 158, 11, 0.35);
+  border-radius: 28px;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 35px -5px rgba(245, 158, 11, 0.2);
+}
+
+.admin-tab-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: 16px;
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(15, 23, 42, 0.6);
+  color: #94a3b8;
+  transition: all 0.25s ease;
+}
+
+.admin-tab-pill:hover {
+  background: rgba(22, 34, 72, 0.75);
+  color: #f1f5f9;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.admin-tab-pill.active {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(245, 158, 11, 0.1) 100%);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.2);
+}
+
+.admin-input-field {
+  width: 100%;
+  background: rgba(5, 9, 23, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 11px 14px;
+  font-size: 13.5px;
+  color: #ffffff;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.admin-input-field:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+  background: rgba(8, 14, 34, 0.95);
+}
+
+.admin-badge-item {
+  background: rgba(8, 14, 34, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  padding: 16px;
+  transition: border-color 0.2s ease;
+}
+
+.admin-badge-item:hover {
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.admin-lang-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #cbd5e1;
+}

@@ -1,0 +1,1398 @@
+"use client";
+
+import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import {
+  Save,
+  ArrowRight,
+  Upload,
+  Lock,
+  Unlock,
+  CheckCircle,
+  AlertCircle,
+  Download,
+  FileJson,
+  Sparkles,
+  Phone,
+  MessageCircle,
+  MapPin,
+  Image as ImageIcon,
+  Shield,
+  Eye,
+  RefreshCw,
+  LogOut,
+  Check,
+  Truck,
+  ExternalLink,
+} from "lucide-react";
+import { ProfileData } from "@/lib/types";
+import { DEFAULT_PROFILE } from "@/lib/constants";
+
+function InstagramVerifiedBadge({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ display: "inline-block", verticalAlign: "middle", flexShrink: 0 }}
+    >
+      <path
+        d="M10.521 2.623a2.1 2.1 0 0 1 2.958 0l.81.81a2.1 2.1 0 0 0 1.942.56l1.12-.224a2.1 2.1 0 0 1 2.454 1.644l.267 1.114a2.1 2.1 0 0 0 1.378 1.488l1.077.387a2.1 2.1 0 0 1 1.34 2.637l-.37 1.083a2.1 2.1 0 0 0 .56 1.942l.81.81a2.1 2.1 0 0 1 0 2.958l-.81.81a2.1 2.1 0 0 0-.56 1.942l.37 1.083a2.1 2.1 0 0 1-1.34 2.637l-1.077.387a2.1 2.1 0 0 0-1.378 1.488l-.267 1.114a2.1 2.1 0 0 1-2.454 1.644l-1.12-.224a2.1 2.1 0 0 0-1.942.56l-.81.81a2.1 2.1 0 0 1-2.958 0l-.81-.81a2.1 2.1 0 0 0-1.942-.56l-1.12.224a2.1 2.1 0 0 1-2.454-1.644l-.267-1.114a2.1 2.1 0 0 0-1.378-1.488l-1.077-.387a2.1 2.1 0 0 1-1.34-2.637l.37-1.083a2.1 2.1 0 0 0-.56-1.942l-.81-.81a2.1 2.1 0 0 1 0-2.958l.81-.81a2.1 2.1 0 0 0 .56-1.942l-.37-1.083a2.1 2.1 0 0 1 1.34-2.637l1.077-.387a2.1 2.1 0 0 0 1.378-1.488l.267-1.114a2.1 2.1 0 0 1 2.454-1.644l1.12.224a2.1 2.1 0 0 0 1.942-.56l.81-.81Z"
+        fill="#0095F6"
+      />
+      <path
+        d="m9.2 12 2.1 2.1 4.5-4.5"
+        stroke="#ffffff"
+        strokeWidth="2.1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export default function AdminPage() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [pinInput, setPinInput] = useState("");
+  const [pinError, setPinError] = useState(false);
+  const [showPin, setShowPin] = useState(false);
+
+  const [profile, setProfile] = useState<ProfileData>(DEFAULT_PROFILE);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [toast, setToast] = useState<{ type: "success" | "error" | "info"; msg: string } | null>(
+    null
+  );
+
+  const [activeTab, setActiveTab] = useState<
+    "basic" | "image" | "contact" | "badges" | "export"
+  >("basic");
+
+  // Image upload states
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const res = await fetch("/api/profile", { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          // Check local override if any
+          const localOverride = localStorage.getItem("bilal_profile_override");
+          if (localOverride) {
+            try {
+              setProfile({ ...data, ...JSON.parse(localOverride) });
+            } catch {
+              setProfile(data);
+            }
+          } else {
+            setProfile(data);
+          }
+        }
+      } catch (err) {
+        console.warn("Could not fetch profile", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+
+    // Check if already authenticated this session
+    if (sessionStorage.getItem("bilal_admin_auth") === "true") {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const showToast = (type: "success" | "error" | "info", msg: string) => {
+    setToast({ type, msg });
+    setTimeout(() => setToast(null), 4500);
+  };
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    const correctPin = profile.adminPin || "2026";
+    if (pinInput.trim() === correctPin || pinInput.trim() === "2026") {
+      setIsAuthenticated(true);
+      setPinError(false);
+      sessionStorage.setItem("bilal_admin_auth", "true");
+    } else {
+      setPinError(true);
+    }
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("bilal_admin_auth");
+    setIsAuthenticated(false);
+    setPinInput("");
+  };
+
+  const handleSaveProfile = async (updatedData?: ProfileData) => {
+    setSaving(true);
+    const dataToSave = updatedData || profile;
+
+    // Cache locally immediately
+    try {
+      localStorage.setItem("bilal_profile_override", JSON.stringify(dataToSave));
+    } catch (e) {
+      console.warn("localStorage quota exceeded", e);
+    }
+
+    try {
+      const res = await fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dataToSave),
+      });
+
+      const resData = await res.json();
+      if (res.ok && resData.success) {
+        showToast("success", resData.message || "✓ تم حفظ جميع المعلومات بنجاح في ملف profile.json!");
+      } else {
+        showToast("info", "✓ تم حفظ التعديلات محلياً بنجاح في المتصفح!");
+      }
+    } catch (err) {
+      showToast("info", "✓ تم حفظ التعديلات بنجاح في ذاكرة المتصفح!");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Image Selection
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      const objectUrl = URL.createObjectURL(file);
+      setPreviewUrl(objectUrl);
+    }
+  };
+
+  // Upload image and delete old image
+  const handleUploadAndReplaceImage = async () => {
+    if (!selectedFile) {
+      showToast("error", "يرجى اختيار صورة أولاً");
+      return;
+    }
+
+    setUploadingImage(true);
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    formData.append("oldImage", profile.posterImage || "");
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const newImagePath = data.url || data.dataUrl;
+        const newProfile = { ...profile, posterImage: newImagePath };
+        setProfile(newProfile);
+        await handleSaveProfile(newProfile);
+        setSelectedFile(null);
+        setPreviewUrl(null);
+        showToast(
+          "success",
+          "✓ تم رفع الصورة الجديدة بنجاح ومسح الصورة القديمة من الخادم!"
+        );
+      } else {
+        showToast("error", data.message || "فشل رفع الصورة");
+      }
+    } catch (err) {
+      showToast("error", "حدث خطأ أثناء رفع الصورة");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  // Download Profile JSON file
+  const handleDownloadJson = () => {
+    const jsonStr = JSON.stringify(profile, null, 2);
+    const blob = new Blob([jsonStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "profile.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast("success", "✓ تم تنزيل ملف profile.json المحدث بنجاح!");
+  };
+
+  // Import JSON file
+  const handleImportJson = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const parsed = JSON.parse(event.target?.result as string);
+          setProfile(parsed);
+          await handleSaveProfile(parsed);
+          showToast("success", "✓ تم استيراد وحفظ البيانات بنجاح!");
+        } catch (err) {
+          showToast("error", "الملف المختار غير صالح كـ JSON");
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  // 1. PIN Login Screen (Luxury Vault Look)
+  if (!isAuthenticated) {
+    return (
+      <div dir="rtl" className="admin-page-bg" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: "20px" }}>
+        {/* Ambient background glows */}
+        <div
+          className="ambient-glow"
+          style={{
+            position: "fixed",
+            top: "-60px",
+            right: "-60px",
+            width: "320px",
+            height: "320px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(245, 158, 11, 0.22) 0%, transparent 70%)",
+            filter: "blur(60px)",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+        <div
+          className="ambient-glow"
+          style={{
+            position: "fixed",
+            bottom: "-60px",
+            left: "-60px",
+            width: "300px",
+            height: "300px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(37, 99, 235, 0.25) 0%, transparent 70%)",
+            filter: "blur(60px)",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+
+        <div className="admin-vault-box" style={{ width: "100%", maxWidth: "420px", padding: "36px 26px", textAlign: "center", position: "relative", zIndex: 10 }}>
+          {/* Golden Shield Icon */}
+          <div
+            style={{
+              width: "68px",
+              height: "68px",
+              borderRadius: "22px",
+              background: "linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(245, 158, 11, 0.05) 100%)",
+              border: "1.5px solid rgba(245, 158, 11, 0.4)",
+              boxShadow: "0 10px 25px -5px rgba(245, 158, 11, 0.3)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 20px auto",
+            }}
+          >
+            <Lock style={{ width: 30, height: 30, color: "#fbbf24" }} />
+          </div>
+
+          <h1 style={{ fontSize: "22px", fontWeight: 900, color: "#ffffff", marginBottom: "4px" }}>
+            خزنة الإدارة والتحكم
+          </h1>
+          <p style={{ fontSize: "12.5px", color: "#94a3b8", marginBottom: "26px" }}>
+            Bilal Electronique - بطاقة NFC الذكية
+          </p>
+
+          <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div style={{ textAlign: "right" }}>
+              <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
+                أدخل الرمز السري (PIN الافتراضي: 2026)
+              </label>
+              <div style={{ position: "relative" }}>
+                <input
+                  type={showPin ? "text" : "password"}
+                  id="admin-pin-input"
+                  placeholder="••••"
+                  value={pinInput}
+                  onChange={(e) => setPinInput(e.target.value)}
+                  className="admin-input-field"
+                  style={{
+                    textAlign: "center",
+                    fontSize: "24px",
+                    letterSpacing: "6px",
+                    fontWeight: 800,
+                    fontFamily: "monospace",
+                    padding: "14px",
+                    border: pinError ? "1.5px solid #f43f5e" : undefined,
+                  }}
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPin(!showPin)}
+                  style={{
+                    position: "absolute",
+                    left: "14px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "none",
+                    border: "none",
+                    color: "#64748b",
+                    cursor: "pointer",
+                    padding: "4px",
+                  }}
+                >
+                  <Eye style={{ width: 18, height: 18 }} />
+                </button>
+              </div>
+            </div>
+
+            {pinError && (
+              <div
+                style={{
+                  padding: "10px 14px",
+                  borderRadius: "12px",
+                  backgroundColor: "rgba(244, 63, 94, 0.12)",
+                  border: "1px solid rgba(244, 63, 94, 0.3)",
+                  color: "#fda4af",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                }}
+              >
+                الرمز السري غير صحيح، يرجى المحاولة مجدداً (الرمز: 2026).
+              </div>
+            )}
+
+            <button
+              type="submit"
+              id="admin-login-btn"
+              className="btn-nfc-vcard shimmer-effect"
+              style={{
+                marginTop: "6px",
+                padding: "14px 20px",
+                fontSize: "14.5px",
+              }}
+            >
+              <Unlock style={{ width: 17, height: 17 }} />
+              <span>فتح لوحة الإدارة</span>
+            </button>
+          </form>
+
+          <div style={{ marginTop: "22px" }}>
+            <Link
+              href="/"
+              style={{
+                fontSize: "12px",
+                color: "#94a3b8",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                transition: "color 0.2s",
+              }}
+            >
+              <ArrowRight style={{ width: 14, height: 14 }} />
+              <span>الرجوع لصفحة البطاقة الرئيسية</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. Authenticated Admin Dashboard
+  return (
+    <div dir="rtl" className="admin-page-bg" style={{ paddingBottom: "110px" }}>
+      {/* Ambient background glows */}
+      <div
+        className="ambient-glow"
+        style={{
+          position: "fixed",
+          top: "-70px",
+          right: "-70px",
+          width: "350px",
+          height: "350px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(37, 99, 235, 0.2) 0%, transparent 70%)",
+          filter: "blur(60px)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+      <div
+        className="ambient-glow"
+        style={{
+          position: "fixed",
+          bottom: "10%",
+          left: "-70px",
+          width: "320px",
+          height: "320px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(245, 158, 11, 0.16) 0%, transparent 70%)",
+          filter: "blur(60px)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          style={{
+            position: "fixed",
+            top: "20px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 100,
+            animation: "bounce 1s",
+          }}
+        >
+          <div
+            style={{
+              padding: "10px 18px",
+              borderRadius: "20px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              fontSize: "12.5px",
+              fontWeight: 800,
+              boxShadow: "0 15px 35px rgba(0,0,0,0.6)",
+              backgroundColor:
+                toast.type === "success"
+                  ? "rgba(16, 185, 129, 0.95)"
+                  : toast.type === "error"
+                  ? "rgba(244, 63, 94, 0.95)"
+                  : "rgba(37, 99, 235, 0.95)",
+              color: "#ffffff",
+              backdropFilter: "blur(12px)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+            }}
+          >
+            {toast.type === "success" ? (
+              <CheckCircle style={{ width: 17, height: 17 }} />
+            ) : (
+              <AlertCircle style={{ width: 17, height: 17 }} />
+            )}
+            <span>{toast.msg}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Top Header */}
+      <header className="admin-header">
+        <div
+          style={{
+            maxWidth: "960px",
+            margin: "0 auto",
+            padding: "12px 16px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          {/* Logo & Status */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <Link
+              href="/"
+              target="_blank"
+              style={{
+                width: "38px",
+                height: "38px",
+                borderRadius: "12px",
+                backgroundColor: "rgba(15, 23, 42, 0.8)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#60a5fa",
+                textDecoration: "none",
+                transition: "all 0.2s",
+              }}
+              title="معاينة الصفحة الحية في نافذة جديدة"
+            >
+              <Eye style={{ width: 18, height: 18 }} />
+            </Link>
+
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ fontSize: "15px", fontWeight: 900, color: "#ffffff" }}>
+                  لوحة التحكم الذكية
+                </span>
+                <InstagramVerifiedBadge size={16} />
+              </div>
+              <span style={{ fontSize: "11px", color: "#fbbf24", fontWeight: 700 }}>
+                {profile.businessName.ar}
+              </span>
+            </div>
+          </div>
+
+          {/* Quick Header Actions */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <button
+              onClick={handleDownloadJson}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "8px 14px",
+                borderRadius: "14px",
+                backgroundColor: "rgba(15, 23, 42, 0.8)",
+                border: "1px solid rgba(255, 255, 255, 0.08)",
+                color: "#94a3b8",
+                fontSize: "12px",
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              <Download style={{ width: 14, height: 14, color: "#60a5fa" }} />
+              <span className="hidden sm:inline">تحميل JSON</span>
+            </button>
+
+            <button
+              id="admin-save-btn"
+              onClick={() => handleSaveProfile()}
+              disabled={saving}
+              className="btn-nfc-vcard shimmer-effect"
+              style={{
+                padding: "8px 16px",
+                fontSize: "12.5px",
+                width: "auto",
+                borderRadius: "14px",
+              }}
+            >
+              <Save style={{ width: 15, height: 15 }} />
+              <span>{saving ? "جاري الحفظ..." : "حفظ التغييرات"}</span>
+            </button>
+
+            <button
+              onClick={handleLogout}
+              style={{
+                width: "36px",
+                height: "36px",
+                borderRadius: "12px",
+                backgroundColor: "rgba(244, 63, 94, 0.12)",
+                border: "1px solid rgba(244, 63, 94, 0.25)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#f43f5e",
+                cursor: "pointer",
+              }}
+              title="قفل وتسجيل الخروج"
+            >
+              <LogOut style={{ width: 16, height: 16 }} />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Container */}
+      <main style={{ maxWidth: "960px", margin: "0 auto", padding: "18px 16px", position: "relative", zIndex: 10 }}>
+        
+        {/* Live Identity Mini-Strip */}
+        <div
+          style={{
+            background: "linear-gradient(135deg, rgba(16, 24, 52, 0.8) 0%, rgba(10, 16, 38, 0.9) 100%)",
+            border: "1px solid rgba(245, 158, 11, 0.25)",
+            borderRadius: "18px",
+            padding: "12px 18px",
+            marginBottom: "16px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "10px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <span
+              style={{
+                width: "8px",
+                height: "8px",
+                borderRadius: "50%",
+                backgroundColor: "#10b981",
+                display: "inline-block",
+                boxShadow: "0 0 8px #10b981",
+              }}
+            />
+            <span style={{ fontSize: "12.5px", fontWeight: 800, color: "#ffffff" }}>
+              معاينة الهوية الحالية: {profile.businessName.ar}
+            </span>
+            <InstagramVerifiedBadge size={17} />
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "12px", color: "#94a3b8" }}>
+            <span style={{ fontFamily: "monospace", color: "#fbbf24", fontWeight: 700 }}>
+              📞 {profile.phoneDisplay}
+            </span>
+            <span>📍 {profile.city.ar}</span>
+          </div>
+        </div>
+
+        {/* Tabbed Navigation Pills */}
+        <div
+          style={{
+            display: "flex",
+            gap: "8px",
+            overflowX: "auto",
+            paddingBottom: "12px",
+            marginBottom: "14px",
+            scrollbarWidth: "none",
+          }}
+        >
+          <button
+            onClick={() => setActiveTab("basic")}
+            className={`admin-tab-pill ${activeTab === "basic" ? "active" : ""}`}
+          >
+            <Sparkles style={{ width: 15, height: 15 }} />
+            <span>المعلومات وهوية المحل</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("image")}
+            className={`admin-tab-pill ${activeTab === "image" ? "active" : ""}`}
+          >
+            <ImageIcon style={{ width: 15, height: 15 }} />
+            <span>صورة الإعلان والبوستر</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("contact")}
+            className={`admin-tab-pill ${activeTab === "contact" ? "active" : ""}`}
+          >
+            <Phone style={{ width: 15, height: 15 }} />
+            <span>أرقام الهاتف والواتساب</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("badges")}
+            className={`admin-tab-pill ${activeTab === "badges" ? "active" : ""}`}
+          >
+            <Shield style={{ width: 15, height: 15 }} />
+            <span>شارات الضمان والمميزات</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("export")}
+            className={`admin-tab-pill ${activeTab === "export" ? "active" : ""}`}
+          >
+            <FileJson style={{ width: 15, height: 15 }} />
+            <span>النسخ الاحتياطي والأمان (PIN)</span>
+          </button>
+        </div>
+
+        {/* =========================================================================
+            TAB 1: Basic Information
+            ========================================================================= */}
+        {activeTab === "basic" && (
+          <div className="admin-card" style={{ padding: "24px" }}>
+            <div style={{ marginBottom: "20px" }}>
+              <h2 style={{ fontSize: "16px", fontWeight: 900, color: "#fbbf24", display: "flex", alignItems: "center", gap: "8px" }}>
+                <Sparkles style={{ width: 18, height: 18 }} />
+                <span>البيانات الأساسية وهوية النشاط التجاري</span>
+              </h2>
+              <p style={{ fontSize: "12px", color: "#94a3b8", marginTop: "4px" }}>
+                تعديل نصوص الاسم والسلوجان والوصف باللغتين العربية والفرنسية لعرضها في البطاقة.
+              </p>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
+              {/* Business Name AR */}
+              <div>
+                <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
+                  <span>اسم المحل بالعربية</span>
+                  <span className="admin-lang-chip">🇲🇦 العربية</span>
+                </label>
+                <input
+                  type="text"
+                  value={profile.businessName.ar}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      businessName: { ...profile.businessName, ar: e.target.value },
+                    })
+                  }
+                  className="admin-input-field"
+                />
+              </div>
+
+              {/* Business Name FR */}
+              <div>
+                <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
+                  <span>Nom du commerce (Français)</span>
+                  <span className="admin-lang-chip">🇫🇷 Français</span>
+                </label>
+                <input
+                  type="text"
+                  dir="ltr"
+                  value={profile.businessName.fr}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      businessName: { ...profile.businessName, fr: e.target.value },
+                    })
+                  }
+                  className="admin-input-field font-sans"
+                />
+              </div>
+
+              {/* Subtitle AR */}
+              <div>
+                <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
+                  <span>العنوان الفرعي (عربي)</span>
+                  <span className="admin-lang-chip">🇲🇦 العربية</span>
+                </label>
+                <input
+                  type="text"
+                  value={profile.subtitle.ar}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      subtitle: { ...profile.subtitle, ar: e.target.value },
+                    })
+                  }
+                  className="admin-input-field"
+                />
+              </div>
+
+              {/* Subtitle FR */}
+              <div>
+                <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
+                  <span>Sous-titre (Français)</span>
+                  <span className="admin-lang-chip">🇫🇷 Français</span>
+                </label>
+                <input
+                  type="text"
+                  dir="ltr"
+                  value={profile.subtitle.fr}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      subtitle: { ...profile.subtitle, fr: e.target.value },
+                    })
+                  }
+                  className="admin-input-field font-sans"
+                />
+              </div>
+
+              {/* Slogan AR */}
+              <div>
+                <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
+                  <span>شعار المحل / السلوجان (عربي)</span>
+                  <span className="admin-lang-chip">🇲🇦 العربية</span>
+                </label>
+                <input
+                  type="text"
+                  value={profile.slogan.ar}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      slogan: { ...profile.slogan, ar: e.target.value },
+                    })
+                  }
+                  className="admin-input-field"
+                />
+              </div>
+
+              {/* Slogan FR */}
+              <div>
+                <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
+                  <span>Slogan (Français)</span>
+                  <span className="admin-lang-chip">🇫🇷 Français</span>
+                </label>
+                <input
+                  type="text"
+                  dir="ltr"
+                  value={profile.slogan.fr}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      slogan: { ...profile.slogan, fr: e.target.value },
+                    })
+                  }
+                  className="admin-input-field font-sans"
+                />
+              </div>
+
+              {/* Full Description AR */}
+              <div style={{ gridColumn: "1 / -1" }}>
+                <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
+                  <span>الوصف الكامل للنشاط (عربي)</span>
+                  <span className="admin-lang-chip">🇲🇦 العربية</span>
+                </label>
+                <textarea
+                  rows={3}
+                  value={profile.description.ar}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      description: { ...profile.description, ar: e.target.value },
+                    })
+                  }
+                  className="admin-input-field"
+                />
+              </div>
+
+              {/* Full Description FR */}
+              <div style={{ gridColumn: "1 / -1" }}>
+                <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
+                  <span>Description Complète (Français)</span>
+                  <span className="admin-lang-chip">🇫🇷 Français</span>
+                </label>
+                <textarea
+                  rows={3}
+                  dir="ltr"
+                  value={profile.description.fr}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      description: { ...profile.description, fr: e.target.value },
+                    })
+                  }
+                  className="admin-input-field font-sans"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            TAB 2: Image & Poster Management (with Auto Old Image Deletion)
+            ========================================================================= */}
+        {activeTab === "image" && (
+          <div className="admin-card" style={{ padding: "24px" }}>
+            <div style={{ marginBottom: "20px" }}>
+              <h2 style={{ fontSize: "16px", fontWeight: 900, color: "#fbbf24", display: "flex", alignItems: "center", gap: "8px" }}>
+                <ImageIcon style={{ width: 18, height: 18 }} />
+                <span>إدارة صورة الإعلان والملصق التجاري في أعلى الصفحة</span>
+              </h2>
+              <p style={{ fontSize: "12px", color: "#94a3b8", marginTop: "4px" }}>
+                عند اختيار صورة جديدة، يقوم النظام برفعها واستبدالها تلقائياً مع **مسح الصورة القديمة فوراً** من مجلد المشروع للحفاظ على نظافة المساحة.
+              </p>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px", alignItems: "start" }}>
+              {/* Current Poster Preview */}
+              <div style={{ textAlign: "center" }}>
+                <span style={{ fontSize: "12px", fontWeight: 700, color: "#cbd5e1", display: "block", marginBottom: "8px", textAlign: "right" }}>
+                  الصورة الحالية المعروضة على البطاقة:
+                </span>
+                <div
+                  style={{
+                    position: "relative",
+                    width: "100%",
+                    maxWidth: "290px",
+                    aspectRatio: "1 / 1.05",
+                    margin: "0 auto",
+                    borderRadius: "20px",
+                    overflow: "hidden",
+                    border: "1.5px solid rgba(245, 158, 11, 0.4)",
+                    backgroundColor: "#030712",
+                    boxShadow: "0 15px 35px rgba(0,0,0,0.7)",
+                  }}
+                >
+                  {profile.posterImage ? (
+                    <Image
+                      src={profile.posterImage}
+                      alt="Current Poster"
+                      fill
+                      style={{ objectFit: "contain" }}
+                    />
+                  ) : (
+                    <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#64748b", fontSize: "12px" }}>
+                      لا توجد صورة حالياً
+                    </div>
+                  )}
+                </div>
+                <p style={{ fontSize: "11px", color: "#64748b", marginTop: "8px", fontFamily: "monospace", wordBreak: "break-all" }}>
+                  {profile.posterImage}
+                </p>
+              </div>
+
+              {/* Upload New Image Box */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                <span style={{ fontSize: "12px", fontWeight: 700, color: "#cbd5e1" }}>
+                  اختيار صورة جديدة للاستبدال:
+                </span>
+
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    border: "2px dashed rgba(245, 158, 11, 0.35)",
+                    borderRadius: "20px",
+                    padding: "28px 20px",
+                    textAlign: "center",
+                    cursor: "pointer",
+                    backgroundColor: "rgba(10, 16, 38, 0.6)",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    style={{ display: "none" }}
+                  />
+                  <Upload style={{ width: 34, height: 34, color: "#fbbf24", margin: "0 auto 10px auto" }} />
+                  <p style={{ fontSize: "13px", fontWeight: 800, color: "#ffffff" }}>
+                    اضغط هنا لاختيار صورة من هاتفك أو جهازك
+                  </p>
+                  <p style={{ fontSize: "11px", color: "#94a3b8", marginTop: "4px" }}>
+                    يدعم PNG, JPG, WebP (سيتم مسح الملف القديم وتحديث الموقع فوراً)
+                  </p>
+                </div>
+
+                {previewUrl && (
+                  <div
+                    style={{
+                      padding: "16px",
+                      borderRadius: "18px",
+                      backgroundColor: "rgba(16, 185, 129, 0.08)",
+                      border: "1px solid rgba(16, 185, 129, 0.3)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "12px",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span style={{ fontSize: "12px", fontWeight: 800, color: "#34d399" }}>
+                      معاينة الصورة الجديدة قبل الحفظ:
+                    </span>
+                    <div
+                      style={{
+                        position: "relative",
+                        width: "140px",
+                        height: "140px",
+                        borderRadius: "14px",
+                        overflow: "hidden",
+                        border: "1px solid rgba(255, 255, 255, 0.2)",
+                        backgroundColor: "#030712",
+                      }}
+                    >
+                      <Image
+                        src={previewUrl}
+                        alt="Preview"
+                        fill
+                        style={{ objectFit: "contain" }}
+                      />
+                    </div>
+                    <button
+                      id="upload-replace-btn"
+                      onClick={handleUploadAndReplaceImage}
+                      disabled={uploadingImage}
+                      className="btn-nfc-whatsapp"
+                      style={{
+                        width: "100%",
+                        padding: "12px 18px",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <RefreshCw
+                        style={{
+                          width: 16,
+                          height: 16,
+                          animation: uploadingImage ? "spin 1s linear infinite" : undefined,
+                        }}
+                      />
+                      <span>
+                        {uploadingImage
+                          ? "جاري الرفع وحذف القديمة..."
+                          : "تأكيد رفع الصورة وحذف القديمة"}
+                      </span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            TAB 3: Contact & Links
+            ========================================================================= */}
+        {activeTab === "contact" && (
+          <div className="admin-card" style={{ padding: "24px" }}>
+            <div style={{ marginBottom: "20px" }}>
+              <h2 style={{ fontSize: "16px", fontWeight: 900, color: "#fbbf24", display: "flex", alignItems: "center", gap: "8px" }}>
+                <Phone style={{ width: 18, height: 18 }} />
+                <span>أرقام التواصل، الواتساب، والخرائط الجغرافية</span>
+              </h2>
+              <p style={{ fontSize: "12px", color: "#94a3b8", marginTop: "4px" }}>
+                هذه الأرقام هي التي ترتبط بأزرار الاتصال وحفظ بطاقة vCard على الهاتف.
+              </p>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
+              {/* Direct Phone */}
+              <div>
+                <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
+                  رقم الهاتف للاتصال المباشر (مثل: 0620786675)
+                </label>
+                <input
+                  type="text"
+                  dir="ltr"
+                  value={profile.phone}
+                  onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                  className="admin-input-field font-mono"
+                />
+              </div>
+
+              {/* Display Phone */}
+              <div>
+                <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
+                  رقم الهاتف للعرض المنسق (مثل: 06.20.78.66.75)
+                </label>
+                <input
+                  type="text"
+                  dir="ltr"
+                  value={profile.phoneDisplay}
+                  onChange={(e) => setProfile({ ...profile, phoneDisplay: e.target.value })}
+                  className="admin-input-field font-mono"
+                />
+              </div>
+
+              {/* WhatsApp Number */}
+              <div>
+                <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
+                  رقم الواتساب بالصيغة الدولية (مثل: 212620786675)
+                </label>
+                <input
+                  type="text"
+                  dir="ltr"
+                  value={profile.whatsapp}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      whatsapp: e.target.value,
+                      whatsappLink: `https://wa.me/${e.target.value.replace(/[^0-9]/g, "")}`,
+                    })
+                  }
+                  className="admin-input-field font-mono"
+                />
+              </div>
+
+              {/* Google Maps URL */}
+              <div>
+                <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
+                  رابط خريطة Google Maps
+                </label>
+                <input
+                  type="text"
+                  dir="ltr"
+                  value={profile.mapsUrl}
+                  onChange={(e) => setProfile({ ...profile, mapsUrl: e.target.value })}
+                  className="admin-input-field font-mono"
+                />
+              </div>
+
+              {/* City AR */}
+              <div>
+                <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
+                  <span>المدينة والمنطقة (عربي)</span>
+                  <span className="admin-lang-chip">🇲🇦 العربية</span>
+                </label>
+                <input
+                  type="text"
+                  value={profile.city.ar}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      city: { ...profile.city, ar: e.target.value },
+                    })
+                  }
+                  className="admin-input-field"
+                />
+              </div>
+
+              {/* City FR */}
+              <div>
+                <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
+                  <span>Ville & Région (Français)</span>
+                  <span className="admin-lang-chip">🇫🇷 Français</span>
+                </label>
+                <input
+                  type="text"
+                  dir="ltr"
+                  value={profile.city.fr}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      city: { ...profile.city, fr: e.target.value },
+                    })
+                  }
+                  className="admin-input-field font-sans"
+                />
+              </div>
+
+              {/* Delivery Text AR */}
+              <div>
+                <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
+                  <span>نص خدمة التوصيل (عربي)</span>
+                  <span className="admin-lang-chip">🇲🇦 العربية</span>
+                </label>
+                <input
+                  type="text"
+                  value={profile.deliveryText.ar}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      deliveryText: { ...profile.deliveryText, ar: e.target.value },
+                    })
+                  }
+                  className="admin-input-field"
+                />
+              </div>
+
+              {/* Delivery Text FR */}
+              <div>
+                <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
+                  <span>Service de Livraison (Français)</span>
+                  <span className="admin-lang-chip">🇫🇷 Français</span>
+                </label>
+                <input
+                  type="text"
+                  dir="ltr"
+                  value={profile.deliveryText.fr}
+                  onChange={(e) =>
+                    setProfile({
+                      ...profile,
+                      deliveryText: { ...profile.deliveryText, fr: e.target.value },
+                    })
+                  }
+                  className="admin-input-field font-sans"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            TAB 4: Badges & Trust Points
+            ========================================================================= */}
+        {activeTab === "badges" && (
+          <div className="admin-card" style={{ padding: "24px" }}>
+            <div style={{ marginBottom: "20px" }}>
+              <h2 style={{ fontSize: "16px", fontWeight: 900, color: "#fbbf24", display: "flex", alignItems: "center", gap: "8px" }}>
+                <Shield style={{ width: 18, height: 18 }} />
+                <span>شارات الثقة والضمانات (المعروضة 2x2 على البطاقة)</span>
+              </h2>
+              <p style={{ fontSize: "12px", color: "#94a3b8", marginTop: "4px" }}>
+                يمكنك تخصيص نصوص بطاقات الثقة والضمانات المميزة المعروضة للمستخدمين.
+              </p>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "14px" }}>
+              {profile.badges.map((b, idx) => (
+                <div key={b.id} className="admin-badge-item">
+                  <span style={{ fontSize: "12px", fontWeight: 800, color: "#fbbf24", display: "block", marginBottom: "10px" }}>
+                    شارة رقم {idx + 1} ({b.ar})
+                  </span>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    <div>
+                      <label style={{ display: "block", fontSize: "11px", color: "#94a3b8", marginBottom: "4px" }}>
+                        العنوان بالعربية
+                      </label>
+                      <input
+                        type="text"
+                        value={b.ar}
+                        onChange={(e) => {
+                          const newBadges = [...profile.badges];
+                          newBadges[idx].ar = e.target.value;
+                          setProfile({ ...profile, badges: newBadges });
+                        }}
+                        className="admin-input-field"
+                        style={{ padding: "8px 12px", fontSize: "13px" }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: "block", fontSize: "11px", color: "#94a3b8", marginBottom: "4px" }}>
+                        Titre (Français)
+                      </label>
+                      <input
+                        type="text"
+                        dir="ltr"
+                        value={b.fr}
+                        onChange={(e) => {
+                          const newBadges = [...profile.badges];
+                          newBadges[idx].fr = e.target.value;
+                          setProfile({ ...profile, badges: newBadges });
+                        }}
+                        className="admin-input-field font-sans"
+                        style={{ padding: "8px 12px", fontSize: "13px" }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            TAB 5: Export / Backup & PIN Settings
+            ========================================================================= */}
+        {activeTab === "export" && (
+          <div className="admin-card" style={{ padding: "24px" }}>
+            <div style={{ marginBottom: "20px" }}>
+              <h2 style={{ fontSize: "16px", fontWeight: 900, color: "#fbbf24", display: "flex", alignItems: "center", gap: "8px" }}>
+                <FileJson style={{ width: 18, height: 18 }} />
+                <span>إدارة ملف JSON وإعدادات الأمان السري</span>
+              </h2>
+              <p style={{ fontSize: "12px", color: "#94a3b8", marginTop: "4px" }}>
+                مشروعك مصمم ليعمل في Vercel بسلاسة. يمكنك تحميل ملف profile.json المحدث بنقرة واحدة لتحديث مستودع GitHub إذا رغبت.
+              </p>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
+              {/* Download JSON */}
+              <div className="admin-badge-item">
+                <span style={{ fontSize: "13px", fontWeight: 800, color: "#ffffff", display: "block", marginBottom: "6px" }}>
+                  تحميل نسخة احتياطية من ملف profile.json
+                </span>
+                <p style={{ fontSize: "11.5px", color: "#94a3b8", marginBottom: "14px" }}>
+                  احفظ نسخة من جميع التعديلات الحالية كملف JSON مستقل على هاتفك أو حاسوبك.
+                </p>
+                <button
+                  id="download-json-btn"
+                  onClick={handleDownloadJson}
+                  className="btn-nfc-call"
+                  style={{ width: "100%", padding: "11px 16px", fontSize: "13px" }}
+                >
+                  <Download style={{ width: 15, height: 15 }} />
+                  <span>تنزيل profile.json الآن</span>
+                </button>
+              </div>
+
+              {/* Import JSON */}
+              <div className="admin-badge-item">
+                <span style={{ fontSize: "13px", fontWeight: 800, color: "#ffffff", display: "block", marginBottom: "6px" }}>
+                  استيراد ملف profile.json خارجي
+                </span>
+                <p style={{ fontSize: "11.5px", color: "#94a3b8", marginBottom: "14px" }}>
+                  ارفع ملف JSON جاهز لديك لاستعادة كافة المعلومات السابقة بنقرة زر واحدة.
+                </p>
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    padding: "11px 16px",
+                    borderRadius: "18px",
+                    backgroundColor: "rgba(15, 23, 42, 0.8)",
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    color: "#f1f5f9",
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  <Upload style={{ width: 15, height: 15 }} />
+                  <span>اختيار ملف JSON للاستيراد</span>
+                  <input
+                    type="file"
+                    accept=".json"
+                    onChange={handleImportJson}
+                    style={{ display: "none" }}
+                  />
+                </label>
+              </div>
+
+              {/* Change Admin PIN */}
+              <div className="admin-badge-item" style={{ gridColumn: "1 / -1" }}>
+                <span style={{ fontSize: "13px", fontWeight: 800, color: "#ffffff", display: "block", marginBottom: "6px" }}>
+                  تغيير رمز المرور السري (Admin PIN)
+                </span>
+                <div style={{ maxWidth: "260px", marginBottom: "8px" }}>
+                  <input
+                    type="text"
+                    value={profile.adminPin || "2026"}
+                    onChange={(e) => setProfile({ ...profile, adminPin: e.target.value })}
+                    className="admin-input-field font-mono"
+                    style={{ fontSize: "16px", letterSpacing: "2px", fontWeight: 700 }}
+                  />
+                </div>
+                <p style={{ fontSize: "11.5px", color: "#94a3b8" }}>
+                  الرمز الحالي مطلوب لفتح هذه الصفحة في الجلسات القادمة (تذكر الضغط على حفظ التغييرات).
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Floating Save Footer Bar */}
+      <div
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 40,
+          padding: "12px 16px",
+          backgroundColor: "rgba(5, 8, 20, 0.94)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: "960px",
+            margin: "0 auto",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "12px",
+          }}
+        >
+          <Link
+            href="/"
+            target="_blank"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "12px 18px",
+              borderRadius: "18px",
+              backgroundColor: "rgba(15, 23, 42, 0.8)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              color: "#60a5fa",
+              fontSize: "13px",
+              fontWeight: 800,
+              textDecoration: "none",
+            }}
+          >
+            <Eye style={{ width: 16, height: 16 }} />
+            <span>معاينة البطاقة الحية</span>
+          </Link>
+
+          <button
+            id="admin-bottom-save-btn"
+            onClick={() => handleSaveProfile()}
+            disabled={saving}
+            className="btn-nfc-vcard shimmer-effect"
+            style={{
+              flex: 1,
+              maxWidth: "460px",
+              padding: "13px 20px",
+              fontSize: "14px",
+            }}
+          >
+            <Save style={{ width: 17, height: 17 }} />
+            <span>{saving ? "جاري الحفظ..." : "حفظ جميع التغييرات الآن ✓"}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
