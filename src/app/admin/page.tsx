@@ -910,9 +910,25 @@ export default function AdminPage() {
                     </div>
                   )}
                 </div>
-                <p style={{ fontSize: "11px", color: "#64748b", marginTop: "8px", fontFamily: "monospace", wordBreak: "break-all" }}>
-                  {profile.posterImage}
-                </p>
+                <div style={{ marginTop: "10px" }}>
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "5px 12px",
+                      borderRadius: "14px",
+                      background: "rgba(16, 185, 129, 0.12)",
+                      border: "1px solid rgba(16, 185, 129, 0.3)",
+                      color: "#34d399",
+                      fontSize: "11px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    <Check style={{ width: 12, height: 12 }} />
+                    <span>الصورة مفعلة ونشطة في الموقع</span>
+                  </span>
+                </div>
               </div>
 
               {/* Upload New Image Box */}
