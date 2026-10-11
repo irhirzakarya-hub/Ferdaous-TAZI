@@ -25,6 +25,7 @@ import {
   Check,
   Truck,
   ExternalLink,
+  QrCode,
 } from "lucide-react";
 import { ProfileData } from "@/lib/types";
 import { DEFAULT_PROFILE } from "@/lib/constants";
@@ -76,6 +77,12 @@ export default function AdminPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // QR Code upload states
+  const [selectedQrFile, setSelectedQrFile] = useState<File | null>(null);
+  const [qrPreviewUrl, setQrPreviewUrl] = useState<string | null>(null);
+  const [uploadingQr, setUploadingQr] = useState(false);
+  const qrFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -211,6 +218,57 @@ export default function AdminPage() {
       showToast("error", "حدث خطأ أثناء رفع الصورة");
     } finally {
       setUploadingImage(false);
+    }
+  };
+
+  // QR Code Selection
+  const handleQrFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedQrFile(file);
+      const objectUrl = URL.createObjectURL(file);
+      setQrPreviewUrl(objectUrl);
+    }
+  };
+
+  // Upload QR Code image and delete old QR image
+  const handleUploadAndReplaceQr = async () => {
+    if (!selectedQrFile) {
+      showToast("error", "يرجى اختيار صورة رمز QR أولاً");
+      return;
+    }
+
+    setUploadingQr(true);
+    const formData = new FormData();
+    formData.append("file", selectedQrFile);
+    formData.append("oldImage", profile.qrCodeImage || "");
+    formData.append("prefix", "qr");
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const newQrPath = data.url || data.dataUrl;
+        const newProfile = { ...profile, qrCodeImage: newQrPath };
+        setProfile(newProfile);
+        await handleSaveProfile(newProfile);
+        setSelectedQrFile(null);
+        setQrPreviewUrl(null);
+        showToast(
+          "success",
+          "✓ تم رفع وحفظ رمز QR الجديد بنجاح ومسح الرمز القديم!"
+        );
+      } else {
+        showToast("error", data.message || "فشل رفع رمز QR");
+      }
+    } catch (err) {
+      showToast("error", "حدث خطأ أثناء رفع رمز QR");
+    } finally {
+      setUploadingQr(false);
     }
   };
 
@@ -648,7 +706,7 @@ export default function AdminPage() {
             className={`admin-tab-pill ${activeTab === "image" ? "active" : ""}`}
           >
             <ImageIcon style={{ width: 15, height: 15 }} />
-            <span>صورة الإعلان والبوستر</span>
+            <span>الصور والبوستر ورمز QR</span>
           </button>
 
           <button
@@ -852,168 +910,340 @@ export default function AdminPage() {
         )}
 
         {/* =========================================================================
-            TAB 2: Image & Poster Management (with Auto Old Image Deletion)
+            TAB 2: Image & Poster & QR Management (with Auto Old File Deletion)
             ========================================================================= */}
         {activeTab === "image" && (
-          <div className="admin-card" style={{ padding: "24px" }}>
-            <div style={{ marginBottom: "20px" }}>
-              <h2 style={{ fontSize: "16px", fontWeight: 900, color: "#fbbf24", display: "flex", alignItems: "center", gap: "8px" }}>
-                <ImageIcon style={{ width: 18, height: 18 }} />
-                <span>إدارة صورة الإعلان والملصق التجاري في أعلى الصفحة</span>
-              </h2>
-              <p style={{ fontSize: "12px", color: "#94a3b8", marginTop: "4px" }}>
-                عند اختيار صورة جديدة، يقوم النظام برفعها واستبدالها تلقائياً مع **مسح الصورة القديمة فوراً** من مجلد المشروع للحفاظ على نظافة المساحة.
-              </p>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px", alignItems: "start" }}>
-              {/* Current Poster Preview */}
-              <div style={{ textAlign: "center" }}>
-                <span style={{ fontSize: "12px", fontWeight: 700, color: "#cbd5e1", display: "block", marginBottom: "8px", textAlign: "right" }}>
-                  الصورة الحالية المعروضة على البطاقة:
-                </span>
-                <div
-                  style={{
-                    position: "relative",
-                    width: "100%",
-                    maxWidth: "290px",
-                    aspectRatio: "1 / 1.05",
-                    margin: "0 auto",
-                    borderRadius: "20px",
-                    overflow: "hidden",
-                    border: "1.5px solid rgba(245, 158, 11, 0.4)",
-                    backgroundColor: "#030712",
-                    boxShadow: "0 15px 35px rgba(0,0,0,0.7)",
-                  }}
-                >
-                  {profile.posterImage ? (
-                    <Image
-                      src={profile.posterImage}
-                      alt="Current Poster"
-                      fill
-                      style={{ objectFit: "contain" }}
-                    />
-                  ) : (
-                    <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#64748b", fontSize: "12px" }}>
-                      لا توجد صورة حالياً
-                    </div>
-                  )}
-                </div>
-                <div style={{ marginTop: "10px" }}>
-                  <span
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      padding: "5px 12px",
-                      borderRadius: "14px",
-                      background: "rgba(16, 185, 129, 0.12)",
-                      border: "1px solid rgba(16, 185, 129, 0.3)",
-                      color: "#34d399",
-                      fontSize: "11px",
-                      fontWeight: 700,
-                    }}
-                  >
-                    <Check style={{ width: 12, height: 12 }} />
-                    <span>الصورة مفعلة ونشطة في الموقع</span>
-                  </span>
-                </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            {/* Card 1: Poster & Advert Image */}
+            <div className="admin-card" style={{ padding: "24px" }}>
+              <div style={{ marginBottom: "20px" }}>
+                <h2 style={{ fontSize: "16px", fontWeight: 900, color: "#fbbf24", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <ImageIcon style={{ width: 18, height: 18 }} />
+                  <span>إدارة صورة الإعلان والملصق التجاري في أعلى الصفحة</span>
+                </h2>
+                <p style={{ fontSize: "12px", color: "#94a3b8", marginTop: "4px" }}>
+                  عند اختيار صورة جديدة، يقوم النظام برفعها واستبدالها تلقائياً مع **مسح الصورة القديمة فوراً** من مجلد المشروع للحفاظ على نظافة المساحة.
+                </p>
               </div>
 
-              {/* Upload New Image Box */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                <span style={{ fontSize: "12px", fontWeight: 700, color: "#cbd5e1" }}>
-                  اختيار صورة جديدة للاستبدال:
-                </span>
-
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  style={{
-                    border: "2px dashed rgba(245, 158, 11, 0.35)",
-                    borderRadius: "20px",
-                    padding: "28px 20px",
-                    textAlign: "center",
-                    cursor: "pointer",
-                    backgroundColor: "rgba(10, 16, 38, 0.6)",
-                    transition: "all 0.2s",
-                  }}
-                >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    style={{ display: "none" }}
-                  />
-                  <Upload style={{ width: 34, height: 34, color: "#fbbf24", margin: "0 auto 10px auto" }} />
-                  <p style={{ fontSize: "13px", fontWeight: 800, color: "#ffffff" }}>
-                    اضغط هنا لاختيار صورة من هاتفك أو جهازك
-                  </p>
-                  <p style={{ fontSize: "11px", color: "#94a3b8", marginTop: "4px" }}>
-                    يدعم PNG, JPG, WebP (سيتم مسح الملف القديم وتحديث الموقع فوراً)
-                  </p>
-                </div>
-
-                {previewUrl && (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px", alignItems: "start" }}>
+                {/* Current Poster Preview */}
+                <div style={{ textAlign: "center" }}>
+                  <span style={{ fontSize: "12px", fontWeight: 700, color: "#cbd5e1", display: "block", marginBottom: "8px", textAlign: "right" }}>
+                    الصورة الحالية المعروضة على البطاقة:
+                  </span>
                   <div
                     style={{
-                      padding: "16px",
-                      borderRadius: "18px",
-                      backgroundColor: "rgba(16, 185, 129, 0.08)",
-                      border: "1px solid rgba(16, 185, 129, 0.3)",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "12px",
-                      alignItems: "center",
+                      position: "relative",
+                      width: "100%",
+                      maxWidth: "290px",
+                      aspectRatio: "1 / 1.05",
+                      margin: "0 auto",
+                      borderRadius: "20px",
+                      overflow: "hidden",
+                      border: "1.5px solid rgba(245, 158, 11, 0.4)",
+                      backgroundColor: "#030712",
+                      boxShadow: "0 15px 35px rgba(0,0,0,0.7)",
                     }}
                   >
-                    <span style={{ fontSize: "12px", fontWeight: 800, color: "#34d399" }}>
-                      معاينة الصورة الجديدة قبل الحفظ:
-                    </span>
-                    <div
-                      style={{
-                        position: "relative",
-                        width: "140px",
-                        height: "140px",
-                        borderRadius: "14px",
-                        overflow: "hidden",
-                        border: "1px solid rgba(255, 255, 255, 0.2)",
-                        backgroundColor: "#030712",
-                      }}
-                    >
+                    {profile.posterImage ? (
                       <Image
-                        src={previewUrl}
-                        alt="Preview"
+                        src={profile.posterImage}
+                        alt="Current Poster"
                         fill
                         style={{ objectFit: "contain" }}
                       />
-                    </div>
-                    <button
-                      id="upload-replace-btn"
-                      onClick={handleUploadAndReplaceImage}
-                      disabled={uploadingImage}
-                      className="btn-nfc-whatsapp"
+                    ) : (
+                      <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#64748b", fontSize: "12px" }}>
+                        لا توجد صورة حالياً
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ marginTop: "10px" }}>
+                    <span
                       style={{
-                        width: "100%",
-                        padding: "12px 18px",
-                        fontSize: "13px",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        padding: "5px 12px",
+                        borderRadius: "14px",
+                        background: "rgba(16, 185, 129, 0.12)",
+                        border: "1px solid rgba(16, 185, 129, 0.3)",
+                        color: "#34d399",
+                        fontSize: "11px",
+                        fontWeight: 700,
                       }}
                     >
-                      <RefreshCw
-                        style={{
-                          width: 16,
-                          height: 16,
-                          animation: uploadingImage ? "spin 1s linear infinite" : undefined,
-                        }}
-                      />
-                      <span>
-                        {uploadingImage
-                          ? "جاري الرفع وحذف القديمة..."
-                          : "تأكيد رفع الصورة وحذف القديمة"}
-                      </span>
-                    </button>
+                      <Check style={{ width: 12, height: 12 }} />
+                      <span>الصورة مفعلة ونشطة في الموقع</span>
+                    </span>
                   </div>
-                )}
+                </div>
+
+                {/* Upload New Image Box */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                  <span style={{ fontSize: "12px", fontWeight: 700, color: "#cbd5e1" }}>
+                    اختيار صورة جديدة للاستبدال:
+                  </span>
+
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{
+                      border: "2px dashed rgba(245, 158, 11, 0.35)",
+                      borderRadius: "20px",
+                      padding: "28px 20px",
+                      textAlign: "center",
+                      cursor: "pointer",
+                      backgroundColor: "rgba(10, 16, 38, 0.6)",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      style={{ display: "none" }}
+                    />
+                    <Upload style={{ width: 34, height: 34, color: "#fbbf24", margin: "0 auto 10px auto" }} />
+                    <p style={{ fontSize: "13px", fontWeight: 800, color: "#ffffff" }}>
+                      اضغط هنا لاختيار صورة من هاتفك أو جهازك
+                    </p>
+                    <p style={{ fontSize: "11px", color: "#94a3b8", marginTop: "4px" }}>
+                      يدعم PNG, JPG, WebP (سيتم مسح الملف القديم وتحديث الموقع فوراً)
+                    </p>
+                  </div>
+
+                  {previewUrl && (
+                    <div
+                      style={{
+                        padding: "16px",
+                        borderRadius: "18px",
+                        backgroundColor: "rgba(16, 185, 129, 0.08)",
+                        border: "1px solid rgba(16, 185, 129, 0.3)",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "12px",
+                        alignItems: "center",
+                      }}
+                    >
+                      <span style={{ fontSize: "12px", fontWeight: 800, color: "#34d399" }}>
+                        معاينة الصورة الجديدة قبل الحفظ:
+                      </span>
+                      <div
+                        style={{
+                          position: "relative",
+                          width: "140px",
+                          height: "140px",
+                          borderRadius: "14px",
+                          overflow: "hidden",
+                          border: "1px solid rgba(255, 255, 255, 0.2)",
+                          backgroundColor: "#030712",
+                        }}
+                      >
+                        <Image
+                          src={previewUrl}
+                          alt="Preview"
+                          fill
+                          style={{ objectFit: "contain" }}
+                        />
+                      </div>
+                      <button
+                        id="upload-replace-btn"
+                        onClick={handleUploadAndReplaceImage}
+                        disabled={uploadingImage}
+                        className="btn-nfc-whatsapp"
+                        style={{
+                          width: "100%",
+                          padding: "12px 18px",
+                          fontSize: "13px",
+                        }}
+                      >
+                        <RefreshCw
+                          style={{
+                            width: 16,
+                            height: 16,
+                            animation: uploadingImage ? "spin 1s linear infinite" : undefined,
+                          }}
+                        />
+                        <span>
+                          {uploadingImage
+                            ? "جاري الرفع وحذف القديمة..."
+                            : "تأكيد رفع الصورة وحذف القديمة"}
+                        </span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Card 2: QR Code Management */}
+            <div className="admin-card" style={{ padding: "24px" }}>
+              <div style={{ marginBottom: "20px" }}>
+                <h2 style={{ fontSize: "16px", fontWeight: 900, color: "#fbbf24", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <QrCode style={{ width: 18, height: 18 }} />
+                  <span>إدارة واستبدال رمز QR (المعروض بأسفل البطاقة)</span>
+                </h2>
+                <p style={{ fontSize: "12px", color: "#94a3b8", marginTop: "4px" }}>
+                  عند اختيار صورة رمز QR جديدة، يتم رفعها وتحديث رمز QR في أسفل الشاشة للزبائن فوراً مع مسح الملف القديم للحفاظ على التخزين.
+                </p>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px", alignItems: "start" }}>
+                {/* Current QR Code Preview */}
+                <div style={{ textAlign: "center" }}>
+                  <span style={{ fontSize: "12px", fontWeight: 700, color: "#cbd5e1", display: "block", marginBottom: "8px", textAlign: "right" }}>
+                    رمز QR الحالي المعروض أسفل البطاقة:
+                  </span>
+                  <div
+                    style={{
+                      position: "relative",
+                      width: "100%",
+                      maxWidth: "240px",
+                      aspectRatio: "1 / 1",
+                      margin: "0 auto",
+                      borderRadius: "20px",
+                      overflow: "hidden",
+                      border: "1.5px solid rgba(245, 158, 11, 0.4)",
+                      backgroundColor: "#ffffff",
+                      boxShadow: "0 15px 35px rgba(0,0,0,0.7)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "16px",
+                    }}
+                  >
+                    {profile.qrCodeImage ? (
+                      <Image
+                        src={profile.qrCodeImage}
+                        alt="Current QR Code"
+                        fill
+                        style={{ objectFit: "contain", padding: "12px" }}
+                      />
+                    ) : (
+                      <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#64748b", fontSize: "12px" }}>
+                        لا يوجد رمز QR حالياً
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ marginTop: "12px" }}>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        padding: "5px 12px",
+                        borderRadius: "14px",
+                        background: "rgba(16, 185, 129, 0.12)",
+                        border: "1px solid rgba(16, 185, 129, 0.3)",
+                        color: "#34d399",
+                        fontSize: "11px",
+                        fontWeight: 700,
+                      }}
+                    >
+                      <Check style={{ width: 12, height: 12 }} />
+                      <span>رمز QR مفعل ونشط في أسفل الموقع</span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* Upload New QR Code Box */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                  <span style={{ fontSize: "12px", fontWeight: 700, color: "#cbd5e1" }}>
+                    اختيار صورة رمز QR جديدة للاستبدال:
+                  </span>
+
+                  <div
+                    onClick={() => qrFileInputRef.current?.click()}
+                    style={{
+                      border: "2px dashed rgba(245, 158, 11, 0.35)",
+                      borderRadius: "20px",
+                      padding: "28px 20px",
+                      textAlign: "center",
+                      cursor: "pointer",
+                      backgroundColor: "rgba(10, 16, 38, 0.6)",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    <input
+                      ref={qrFileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleQrFileChange}
+                      style={{ display: "none" }}
+                    />
+                    <QrCode style={{ width: 34, height: 34, color: "#fbbf24", margin: "0 auto 10px auto" }} />
+                    <p style={{ fontSize: "13px", fontWeight: 800, color: "#ffffff" }}>
+                      اضغط هنا لاختيار صورة رمز QR من جهازك
+                    </p>
+                    <p style={{ fontSize: "11px", color: "#94a3b8", marginTop: "4px" }}>
+                      يدعم PNG, JPG, WebP (سيتم مسح الملف القديم وتحديث الموقع فوراً)
+                    </p>
+                  </div>
+
+                  {qrPreviewUrl && (
+                    <div
+                      style={{
+                        padding: "16px",
+                        borderRadius: "18px",
+                        backgroundColor: "rgba(16, 185, 129, 0.08)",
+                        border: "1px solid rgba(16, 185, 129, 0.3)",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "12px",
+                        alignItems: "center",
+                      }}
+                    >
+                      <span style={{ fontSize: "12px", fontWeight: 800, color: "#34d399" }}>
+                        معاينة رمز QR الجديد قبل الحفظ:
+                      </span>
+                      <div
+                        style={{
+                          position: "relative",
+                          width: "140px",
+                          height: "140px",
+                          borderRadius: "14px",
+                          overflow: "hidden",
+                          border: "1px solid rgba(255, 255, 255, 0.2)",
+                          backgroundColor: "#ffffff",
+                          padding: "8px",
+                        }}
+                      >
+                        <Image
+                          src={qrPreviewUrl}
+                          alt="QR Preview"
+                          fill
+                          style={{ objectFit: "contain", padding: "8px" }}
+                        />
+                      </div>
+                      <button
+                        id="upload-replace-qr-btn"
+                        onClick={handleUploadAndReplaceQr}
+                        disabled={uploadingQr}
+                        className="btn-nfc-whatsapp"
+                        style={{
+                          width: "100%",
+                          padding: "12px 18px",
+                          fontSize: "13px",
+                        }}
+                      >
+                        <RefreshCw
+                          style={{
+                            width: 16,
+                            height: 16,
+                            animation: uploadingQr ? "spin 1s linear infinite" : undefined,
+                          }}
+                        />
+                        <span>
+                          {uploadingQr
+                            ? "جاري الرفع وحذف القديم..."
+                            : "تأكيد رفع رمز QR وحذف القديم"}
+                        </span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

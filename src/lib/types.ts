@@ -45,6 +45,7 @@ export interface ProfileData {
   deliveryText: LocalizedString;
   mapsUrl: string;
   posterImage: string;
+  qrCodeImage?: string;
   logoImage?: string;
   theme?: {
     primary: string;

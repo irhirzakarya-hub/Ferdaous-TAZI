@@ -31,6 +31,7 @@ export const DEFAULT_PROFILE: ProfileData = {
   },
   mapsUrl: "https://maps.google.com/?q=Azilal,Morocco",
   posterImage: "/uploads/poster.png",
+  qrCodeImage: "/uploads/qr.png",
   logoImage: "",
   theme: {
     primary: "#1d4ed8",

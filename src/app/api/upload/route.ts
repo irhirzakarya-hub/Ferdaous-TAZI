@@ -41,8 +41,9 @@ export async function POST(req: Request) {
         await deleteOldImage(oldImage);
       }
 
+      const prefix = (formData.get("prefix") as string) || "img";
       const extension = path.extname(file.name) || ".png";
-      const filename = `poster-${Date.now()}${extension}`;
+      const filename = `${prefix}-${Date.now()}${extension}`;
       const filePath = path.join(uploadsDir, filename);
 
       await fs.promises.writeFile(filePath, buffer);

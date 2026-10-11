@@ -26,6 +26,8 @@ import {
   Lock,
   ExternalLink,
   Flame,
+  QrCode,
+  Download,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { ProfileData } from "@/lib/types";
@@ -61,6 +63,7 @@ export default function HomePage() {
   const [lang, setLang] = useState<"ar" | "fr">("ar");
   const [profile, setProfile] = useState<ProfileData>(DEFAULT_PROFILE);
   const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [savedContactDone, setSavedContactDone] = useState(false);
@@ -745,7 +748,173 @@ export default function HomePage() {
             </a>
           </div>
 
-          {/* 8. Footer */}
+          {/* 🌟 8. Luxury QR Code Card (رمز الاستجابة السريع لمشاركة وحفظ البطاقة) */}
+          {(profile.qrCodeImage || "/uploads/qr.png") && (
+            <div
+              className="luxury-card"
+              style={{
+                padding: "20px 16px",
+                textAlign: "center",
+                background: "linear-gradient(145deg, rgba(16, 24, 52, 0.85) 0%, rgba(10, 16, 38, 0.95) 100%)",
+                border: "1.5px solid rgba(245, 158, 11, 0.35)",
+                boxShadow: "0 15px 35px -10px rgba(0, 0, 0, 0.8), 0 0 25px -5px rgba(245, 158, 11, 0.15)",
+                position: "relative",
+                overflow: "hidden",
+              }}
+            >
+              {/* Top ambient pill */}
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "4px 12px",
+                  borderRadius: "20px",
+                  background: "rgba(245, 158, 11, 0.12)",
+                  border: "1px solid rgba(245, 158, 11, 0.3)",
+                  color: "#fbbf24",
+                  fontSize: "11px",
+                  fontWeight: 800,
+                  marginBottom: "10px",
+                  letterSpacing: "0.4px",
+                }}
+              >
+                <QrCode style={{ width: 13, height: 13 }} />
+                <span>{isAr ? "رمز الاستجابة السريع (QR Code)" : "Code QR de Partage"}</span>
+              </div>
+
+              <h3
+                style={{
+                  fontSize: "15px",
+                  fontWeight: 900,
+                  color: "#ffffff",
+                  marginBottom: "4px",
+                }}
+              >
+                {isAr ? "امسح الرمز لمشاركة البطاقة فوراً" : "Scannez pour Enregistrer"}
+              </h3>
+
+              <p
+                style={{
+                  fontSize: "11.5px",
+                  color: "#94a3b8",
+                  maxWidth: "320px",
+                  margin: "0 auto 16px auto",
+                  lineHeight: "1.4",
+                }}
+              >
+                {isAr
+                  ? "امسح الرمز بكاميرا هاتفك لفتح البطاقة وحفظ جهة الاتصال مباشرة"
+                  : "Scannez avec votre téléphone pour ouvrir et enregistrer le contact"}
+              </p>
+
+              {/* QR Image Container with Luxury Glow */}
+              <div
+                style={{
+                  position: "relative",
+                  display: "inline-block",
+                  padding: "12px",
+                  borderRadius: "22px",
+                  background: "#ffffff",
+                  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.7), 0 0 25px rgba(245, 158, 11, 0.25)",
+                  border: "2.5px solid rgba(245, 158, 11, 0.45)",
+                  cursor: "pointer",
+                  transition: "transform 0.25s ease",
+                }}
+                onClick={() => setQrModalOpen(true)}
+                title={isAr ? "اضغط للتكبير" : "Agrandir"}
+              >
+                <div
+                  style={{
+                    position: "relative",
+                    width: "160px",
+                    height: "160px",
+                  }}
+                >
+                  <Image
+                    src={profile.qrCodeImage || "/uploads/qr.png"}
+                    alt="QR Code"
+                    fill
+                    style={{ objectFit: "contain" }}
+                  />
+                </div>
+
+                {/* Bottom badge on QR */}
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "-10px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+                    color: "#0c1222",
+                    fontSize: "10px",
+                    fontWeight: 900,
+                    padding: "2px 10px",
+                    borderRadius: "10px",
+                    whiteSpace: "nowrap",
+                    boxShadow: "0 4px 10px rgba(0,0,0,0.5)",
+                  }}
+                >
+                  ⚡ SCAN ME
+                </div>
+              </div>
+
+              {/* Action Buttons below QR */}
+              <div
+                style={{
+                  marginTop: "20px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "10px",
+                }}
+              >
+                <a
+                  href={profile.qrCodeImage || "/uploads/qr.png"}
+                  download="bilal-electronique-qr.png"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "8px 14px",
+                    borderRadius: "14px",
+                    background: "rgba(255, 255, 255, 0.08)",
+                    border: "1px solid rgba(255, 255, 255, 0.12)",
+                    color: "#f1f5f9",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    textDecoration: "none",
+                  }}
+                >
+                  <Download style={{ width: 14, height: 14, color: "#60a5fa" }} />
+                  <span>{isAr ? "تحميل الرمز" : "Télécharger"}</span>
+                </a>
+
+                <button
+                  onClick={() => setQrModalOpen(true)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "8px 14px",
+                    borderRadius: "14px",
+                    background: "rgba(37, 99, 235, 0.18)",
+                    border: "1px solid rgba(37, 99, 235, 0.35)",
+                    color: "#93c5fd",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  <Maximize2 style={{ width: 14, height: 14 }} />
+                  <span>{isAr ? "تكبير الرمز" : "Plein écran"}</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 9. Footer */}
           <footer
             style={{
               paddingTop: "16px",
@@ -899,6 +1068,90 @@ export default function HomePage() {
                 {isAr ? "إغلاق" : "Fermer"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Full-Screen QR Lightbox Modal */}
+      {qrModalOpen && (profile.qrCodeImage || "/uploads/qr.png") && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 100,
+            backgroundColor: "rgba(0, 0, 0, 0.94)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+          }}
+          onClick={() => setQrModalOpen(false)}
+        >
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              maxWidth: "360px",
+              textAlign: "center",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setQrModalOpen(false)}
+              style={{
+                position: "absolute",
+                top: "-45px",
+                right: isAr ? "0" : "auto",
+                left: !isAr ? "0" : "auto",
+                width: "36px",
+                height: "36px",
+                borderRadius: "50%",
+                background: "rgba(255, 255, 255, 0.15)",
+                border: "none",
+                color: "#ffffff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
+            >
+              <X style={{ width: 20, height: 20 }} />
+            </button>
+
+            <div
+              style={{
+                position: "relative",
+                width: "260px",
+                height: "260px",
+                margin: "0 auto",
+                padding: "16px",
+                borderRadius: "24px",
+                backgroundColor: "#ffffff",
+                border: "2px solid rgba(245, 158, 11, 0.5)",
+                boxShadow: "0 25px 60px rgba(0,0,0,0.9), 0 0 35px rgba(245, 158, 11, 0.3)",
+              }}
+            >
+              <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                <Image
+                  src={profile.qrCodeImage || "/uploads/qr.png"}
+                  alt="QR Code High Res"
+                  fill
+                  style={{ objectFit: "contain" }}
+                  priority
+                />
+              </div>
+            </div>
+
+            <p style={{ marginTop: "16px", fontSize: "15px", fontWeight: 900, color: "#ffffff" }}>
+              {profile.businessName[lang]}
+            </p>
+            <p style={{ fontSize: "12px", color: "#fbbf24", marginTop: "3px" }}>
+              {isAr ? "امسح الرمز بكاميرا الهاتف لمشاركة وحفظ البطاقة" : "Scannez avec l'appareil photo"}
+            </p>
           </div>
         </div>
       )}
