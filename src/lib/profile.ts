@@ -24,6 +24,22 @@ export function getStorageCapabilities() {
   };
 }
 
+async function getLocalFallbackProfile(): Promise<ProfileData> {
+  try {
+    if (fs.existsSync(DATA_FILE_PATH)) {
+      const raw = await fs.promises.readFile(DATA_FILE_PATH, "utf-8");
+      return JSON.parse(raw);
+    }
+    if (fs.existsSync(PUBLIC_DATA_FILE_PATH)) {
+      const raw = await fs.promises.readFile(PUBLIC_DATA_FILE_PATH, "utf-8");
+      return JSON.parse(raw);
+    }
+  } catch (error) {
+    console.warn("Could not read profile from file system, using fallback", error);
+  }
+  return DEFAULT_PROFILE;
+}
+
 export async function getProfile(): Promise<ProfileData> {
   // 1. Try Vercel KV / Upstash Redis (Fastest & direct Key-Value)
   if (KV_URL && KV_TOKEN) {
@@ -49,10 +65,22 @@ export async function getProfile(): Promise<ProfileData> {
   // 2. Try Vercel Blob Storage
   if (process.env.BLOB_READ_WRITE_TOKEN) {
     try {
-      const { list } = await import("@vercel/blob");
-      const { blobs } = await list({ prefix: "profile-data.json", limit: 1 });
-      if (blobs.length > 0) {
-        const res = await fetch(blobs[0].url, { cache: "no-store" });
+      const { list, put } = await import("@vercel/blob");
+      const { blobs } = await list();
+
+      // Look for the saved profile-data.json file
+      const profileBlob = blobs.find(
+        (b) => b.pathname === "profile-data.json" || b.pathname.endsWith("/profile-data.json")
+      );
+
+      if (profileBlob) {
+        const res = await fetch(`${profileBlob.url}?t=${Date.now()}`, {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+          },
+        });
         if (res.ok) {
           const parsed = await res.json();
           if (parsed && parsed.businessName) {
@@ -60,34 +88,52 @@ export async function getProfile(): Promise<ProfileData> {
           }
         }
       }
+
+      // Auto-recovery: If profile-data.json does not exist yet, but image blobs were uploaded to uploads/
+      const imageBlobs = blobs
+        .filter((b) => b.pathname.startsWith("uploads/"))
+        .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+
+      if (imageBlobs.length > 0) {
+        const latestImageUrl = imageBlobs[0].url;
+        const localProfile = await getLocalFallbackProfile();
+        const autoSyncedProfile = {
+          ...localProfile,
+          posterImage: latestImageUrl,
+        };
+
+        // Persist profile-data.json immediately so all devices synchronize
+        try {
+          await put("profile-data.json", JSON.stringify(autoSyncedProfile, null, 2), {
+            access: "public",
+            addRandomSuffix: false,
+            allowOverwrite: true,
+            cacheControlMaxAge: 0,
+            contentType: "application/json",
+          });
+          console.log("Auto-synced profile-data.json with latest uploaded image:", latestImageUrl);
+        } catch (autoErr) {
+          console.warn("Auto-sync profile-data.json warning:", autoErr);
+        }
+
+        return autoSyncedProfile;
+      }
     } catch (e) {
-      console.warn("Could not read profile from Vercel Blob:", e);
+      console.error("Could not read profile from Vercel Blob:", e);
     }
   }
 
   // 3. Try Local File System (data/profile.json or public/data/profile.json)
-  try {
-    if (fs.existsSync(DATA_FILE_PATH)) {
-      const raw = await fs.promises.readFile(DATA_FILE_PATH, "utf-8");
-      return JSON.parse(raw);
-    }
-    if (fs.existsSync(PUBLIC_DATA_FILE_PATH)) {
-      const raw = await fs.promises.readFile(PUBLIC_DATA_FILE_PATH, "utf-8");
-      return JSON.parse(raw);
-    }
-  } catch (error) {
-    console.warn("Could not read profile from file system, using fallback", error);
-  }
-
-  return DEFAULT_PROFILE;
+  return getLocalFallbackProfile();
 }
 
 export async function saveProfile(
   data: ProfileData,
   options?: { githubToken?: string }
-): Promise<{ success: boolean; isReadOnly?: boolean; storageType?: string }> {
+): Promise<{ success: boolean; isReadOnly?: boolean; storageType?: string; error?: string }> {
   let savedToCloud = false;
   let storageType = "local";
+  let lastError = "";
 
   // 1. Save to Vercel KV / Upstash Redis if configured
   if (KV_URL && KV_TOKEN) {
@@ -113,14 +159,20 @@ export async function saveProfile(
   if (process.env.BLOB_READ_WRITE_TOKEN) {
     try {
       const { put } = await import("@vercel/blob");
-      await put("profile-data.json", JSON.stringify(data, null, 2), {
+      const blob = await put("profile-data.json", JSON.stringify(data, null, 2), {
         access: "public",
         addRandomSuffix: false,
+        allowOverwrite: true,
+        cacheControlMaxAge: 0,
+        contentType: "application/json",
       });
+      console.log("Successfully saved profile to Vercel Blob at:", blob.url);
       savedToCloud = true;
       storageType = storageType === "vercel-kv" ? "kv+blob" : "vercel-blob";
-    } catch (e) {
-      console.warn("Failed to save to Vercel Blob:", e);
+    } catch (e: unknown) {
+      const err = e as Error;
+      lastError = err?.message || String(e);
+      console.error("Failed to save to Vercel Blob:", e);
     }
   }
 
@@ -188,25 +240,41 @@ export async function saveProfile(
   }
 
   return {
-    success: true,
+    success: savedToCloud || savedToFile,
     isReadOnly: !savedToCloud && !savedToFile,
     storageType,
+    error: lastError || undefined,
   };
 }
 
-export async function deleteOldImage(imageRelativePath: string): Promise<boolean> {
-  if (!imageRelativePath || !imageRelativePath.startsWith("/uploads/")) {
-    return false;
-  }
-  try {
-    const filename = path.basename(imageRelativePath);
-    const filePath = path.join(process.cwd(), "public", "uploads", filename);
-    if (fs.existsSync(filePath)) {
-      await fs.promises.unlink(filePath);
+export async function deleteOldImage(imageUrlOrPath: string): Promise<boolean> {
+  if (!imageUrlOrPath) return false;
+
+  // 1. If it is a Vercel Blob URL, delete it from Vercel Blob store
+  if (imageUrlOrPath.includes("public.blob.vercel-storage.com") && process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      const { del } = await import("@vercel/blob");
+      await del(imageUrlOrPath);
+      console.log("Deleted old Vercel Blob image:", imageUrlOrPath);
       return true;
+    } catch (err) {
+      console.warn("Failed to delete old blob image:", err);
     }
-  } catch (err) {
-    console.warn("Failed to delete old image:", err);
   }
+
+  // 2. If it is a local upload path, delete it from local disk
+  if (imageUrlOrPath.startsWith("/uploads/")) {
+    try {
+      const filename = path.basename(imageUrlOrPath);
+      const filePath = path.join(process.cwd(), "public", "uploads", filename);
+      if (fs.existsSync(filePath)) {
+        await fs.promises.unlink(filePath);
+        return true;
+      }
+    } catch (err) {
+      console.warn("Failed to delete old local image:", err);
+    }
+  }
+
   return false;
 }

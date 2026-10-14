@@ -105,7 +105,7 @@ export default function AdminPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const res = await fetch("/api/profile", { cache: "no-store" });
+        const res = await fetch(`/api/profile?t=${Date.now()}`, { cache: "no-store" });
         if (res.ok) {
           const resJson = await res.json();
           const { _storageCapabilities, ...data } = resJson;
@@ -194,12 +194,12 @@ export default function AdminPage() {
         if (resData.storageType === "github" && githubToken.trim()) {
           localStorage.setItem("bilal_github_token", githubToken.trim());
         }
-        showToast("success", resData.message || "✓ تم حفظ جميع المعلومات بنجاح!");
+        showToast("success", resData.message || "✓ تم حفظ جميع المعلومات وتحديث جميع الأجهزة بنجاح!");
       } else {
-        showToast("info", "✓ تم حفظ التعديلات محلياً بنجاح في المتصفح!");
+        showToast("error", resData.message || resData.error || "فشل الحفظ في التخزين السحابي");
       }
     } catch (err) {
-      showToast("info", "✓ تم حفظ التعديلات بنجاح في ذاكرة المتصفح!");
+      showToast("error", "فشل الاتصال بالخادم لحفظ التعديلات");
     } finally {
       setSaving(false);
     }
@@ -708,7 +708,25 @@ export default function AdminPage() {
             <InstagramVerifiedBadge size={17} />
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "12px", color: "#94a3b8" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", fontSize: "12px", color: "#94a3b8" }}>
+            {storageStatus?.hasBlob && (
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  color: "#34d399",
+                  backgroundColor: "rgba(16, 185, 129, 0.12)",
+                  border: "1px solid rgba(16, 185, 129, 0.35)",
+                  padding: "3px 9px",
+                  borderRadius: "10px",
+                }}
+              >
+                ☁️ Vercel Blob نشط (تحديث فوري لجميع الهواتف)
+              </span>
+            )}
             <span style={{ fontFamily: "monospace", color: "#fbbf24", fontWeight: 700 }}>
               📞 {profile.phoneDisplay}
             </span>

@@ -3,6 +3,7 @@ import { getProfile, saveProfile, getStorageCapabilities } from "@/lib/profile";
 import { ProfileData } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function GET() {
   const profile = await getProfile();
@@ -14,7 +15,9 @@ export async function GET() {
     },
     {
       headers: {
-        "Cache-Control": "no-store, max-age=0",
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0",
+        Pragma: "no-cache",
+        Expires: "0",
       },
     }
   );
@@ -49,14 +52,24 @@ export async function POST(req: Request) {
       userMsg = "تم الحفظ محلياً في الجلسة. لتحديث باقي الأجهزة تلقائياً، قم بتفعيل Vercel Storage بضغطة زر واحدة.";
     }
 
-    return NextResponse.json({
-      success: true,
-      profile: cleanBody,
-      isReadOnly: result.isReadOnly,
-      storageType: result.storageType,
-      capabilities,
-      message: userMsg,
-    });
+    return NextResponse.json(
+      {
+        success: result.success,
+        profile: cleanBody,
+        isReadOnly: result.isReadOnly,
+        storageType: result.storageType,
+        capabilities,
+        message: userMsg,
+        error: result.error,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+      }
+    );
   } catch (err: unknown) {
     const error = err as Error;
     return NextResponse.json(

@@ -80,7 +80,7 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchProfile() {
       try {
-        const res = await fetch("/api/profile", { cache: "no-store" });
+        const res = await fetch(`/api/profile?t=${Date.now()}`, { cache: "no-store" });
         if (res.ok) {
           const resJson = await res.json();
           const { _storageCapabilities, ...data } = resJson;
