@@ -28,7 +28,7 @@
     "fr": "Livraison disponible dans la ville d'Azilal et ses environs"
   },
   "mapsUrl": "https://maps.google.com/?q=Azilal,Morocco",
-  "posterImage": "/uploads/poster.png",
+  "posterImage": "/uploads/img-1792020416859.jpg",
   "qrCodeImage": "/uploads/qr.png",
   "logoImage": "",
   "theme": {
@@ -170,9 +170,15 @@
       "label": "أزيلال / Google Maps",
       "url": "https://maps.google.com/?q=Azilal,Morocco",
       "color": "#ea4335"
+    },
+    {
+      "platform": "facebook",
+      "label": "Facebook",
+      "url": "https://www.facebook.com/share/17p9NFS6Sq/",
+      "color": "#1877F2"
     }
   ],
   "instagram": "https://instagram.com/bilal_electronique_212_ma_99?utm_source=qr&exln=MXVuZ3hydHdjcTRxdg==",
-  "facebook": "",
+  "facebook": "https://www.facebook.com/share/17p9NFS6Sq/",
   "adminPin": "2026"
 }
