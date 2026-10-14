@@ -26,6 +26,9 @@ import {
   Truck,
   ExternalLink,
   QrCode,
+  Cloud,
+  Database,
+  Trash2,
 } from "lucide-react";
 import { ProfileData } from "@/lib/types";
 import { DEFAULT_PROFILE } from "@/lib/constants";
@@ -85,22 +88,46 @@ export default function AdminPage() {
   const [uploadingQr, setUploadingQr] = useState(false);
   const qrFileInputRef = useRef<HTMLInputElement>(null);
 
+  // Cloud Storage & Global Sync Status
+  const [storageStatus, setStorageStatus] = useState<{
+    hasKv: boolean;
+    hasBlob: boolean;
+    hasGithub: boolean;
+    isCloudReady: boolean;
+  }>({ hasKv: false, hasBlob: false, hasGithub: false, isCloudReady: false });
+  const [githubToken, setGithubToken] = useState("");
+
+  useEffect(() => {
+    const savedToken = localStorage.getItem("bilal_github_token") || "";
+    if (savedToken) setGithubToken(savedToken);
+  }, []);
+
   useEffect(() => {
     async function loadData() {
       try {
         const res = await fetch("/api/profile", { cache: "no-store" });
         if (res.ok) {
-          const data = await res.json();
-          // Check local override if any
-          const localOverride = localStorage.getItem("bilal_profile_override");
-          if (localOverride) {
-            try {
-              setProfile({ ...data, ...JSON.parse(localOverride) });
-            } catch {
+          const resJson = await res.json();
+          const { _storageCapabilities, ...data } = resJson;
+          if (_storageCapabilities) {
+            setStorageStatus(_storageCapabilities);
+          }
+
+          // If cloud storage is active, it is the global source of truth
+          if (_storageCapabilities?.isCloudReady) {
+            localStorage.removeItem("bilal_profile_override");
+            setProfile(data);
+          } else {
+            const localOverride = localStorage.getItem("bilal_profile_override");
+            if (localOverride) {
+              try {
+                setProfile({ ...data, ...JSON.parse(localOverride) });
+              } catch {
+                setProfile(data);
+              }
+            } else {
               setProfile(data);
             }
-          } else {
-            setProfile(data);
           }
         }
       } catch (err) {
@@ -156,12 +183,18 @@ export default function AdminPage() {
       const res = await fetch("/api/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dataToSave),
+        body: JSON.stringify({
+          ...dataToSave,
+          _githubToken: githubToken.trim() || undefined,
+        }),
       });
 
       const resData = await res.json();
       if (res.ok && resData.success) {
-        showToast("success", resData.message || "✓ تم حفظ جميع المعلومات بنجاح في ملف profile.json!");
+        if (resData.storageType === "github" && githubToken.trim()) {
+          localStorage.setItem("bilal_github_token", githubToken.trim());
+        }
+        showToast("success", resData.message || "✓ تم حفظ جميع المعلومات بنجاح!");
       } else {
         showToast("info", "✓ تم حفظ التعديلات محلياً بنجاح في المتصفح!");
       }
@@ -1567,12 +1600,69 @@ export default function AdminPage() {
           <div className="admin-card" style={{ padding: "24px" }}>
             <div style={{ marginBottom: "20px" }}>
               <h2 style={{ fontSize: "16px", fontWeight: 900, color: "#fbbf24", display: "flex", alignItems: "center", gap: "8px" }}>
-                <FileJson style={{ width: 18, height: 18 }} />
-                <span>إدارة ملف JSON وإعدادات الأمان السري</span>
+                <Cloud style={{ width: 18, height: 18 }} />
+                <span>المزامنة السحابية لجميع الأجهزة والنسخ الاحتياطي</span>
               </h2>
               <p style={{ fontSize: "12px", color: "#94a3b8", marginTop: "4px" }}>
-                مشروعك مصمم ليعمل في Vercel بسلاسة. يمكنك تحميل ملف profile.json المحدث بنقرة واحدة لتحديث مستودع GitHub إذا رغبت.
+                تحكم في مزامنة البيانات عبر السحاب لتظهر الصور والتعديلات على كل أجهزة الزبائن فوراً وبشكل دائم.
               </p>
+            </div>
+
+            {/* Cloud Storage Status Banner */}
+            <div
+              style={{
+                marginBottom: "20px",
+                padding: "16px",
+                borderRadius: "18px",
+                background: storageStatus.isCloudReady
+                  ? "linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 12, 30, 0.9) 100%)"
+                  : "linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(6, 12, 30, 0.9) 100%)",
+                border: `1.5px solid ${storageStatus.isCloudReady ? "rgba(16, 185, 129, 0.4)" : "rgba(245, 158, 11, 0.4)"}`,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px", flexWrap: "wrap", gap: "8px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Database style={{ width: 18, height: 18, color: storageStatus.isCloudReady ? "#34d399" : "#fbbf24" }} />
+                  <span style={{ fontSize: "14px", fontWeight: 800, color: "#ffffff" }}>
+                    {storageStatus.isCloudReady
+                      ? "🟢 التخزين السحابي العالمي نشط ومتصل بـ Vercel"
+                      : "🟡 وضع الحفظ المحلي (تظهر التعديلات على هذا الجهاز فقط)"}
+                  </span>
+                </div>
+                <span
+                  style={{
+                    fontSize: "11px",
+                    fontWeight: 800,
+                    padding: "3px 10px",
+                    borderRadius: "20px",
+                    background: storageStatus.isCloudReady ? "rgba(16, 185, 129, 0.2)" : "rgba(245, 158, 11, 0.2)",
+                    color: storageStatus.isCloudReady ? "#34d399" : "#fbbf24",
+                    border: `1px solid ${storageStatus.isCloudReady ? "rgba(16, 185, 129, 0.4)" : "rgba(245, 158, 11, 0.4)"}`,
+                  }}
+                >
+                  {storageStatus.isCloudReady ? "تحديث تلقائي لكل الأجهزة ✓" : "بحاجة لتفعيل التخزين السحابي"}
+                </span>
+              </div>
+
+              {!storageStatus.isCloudReady ? (
+                <div style={{ fontSize: "12px", color: "#cbd5e1", lineHeight: "1.6" }}>
+                  <p style={{ marginBottom: "10px" }}>
+                    لأن منصة <strong>Vercel</strong> تعمل بنظام Serverless للقراءة فقط، لتظهر الصور والمعلومات الجديدة على <strong>جميع هواتف وحواسيب الزبائن في العالم</strong> فوراً بدون إعادة النشر اليدوي، قم بتفعيل التخزين السحابي بضغطة زر واحدة (مجاناً 100%):
+                  </p>
+                  <ol style={{ paddingRight: "20px", display: "flex", flexDirection: "column", gap: "6px", marginBottom: "12px" }}>
+                    <li>ادخل إلى حسابك في موقع <strong>vercel.com</strong> وافتح مشروعك: <code style={{ color: "#fbbf24" }}>azilal-bilal-nfc</code></li>
+                    <li>اضغط على تبويب <strong>Storage</strong> من القائمة العلوية.</li>
+                    <li>اضغط على <strong>Create Database</strong> ثم اختر <strong>Blob</strong> (للصور والملفات) أو <strong>KV</strong> ثم اضغط <strong>Connect</strong>.</li>
+                  </ol>
+                  <p style={{ color: "#94a3b8", fontSize: "11px" }}>
+                    ⚡ بمجرد الضغط على Connect، سيتصل الموقع بالسحاب تلقائياً وتتحدث الصور والمعلومات على كل أجهزة الزبائن فوراً!
+                  </p>
+                </div>
+              ) : (
+                <p style={{ fontSize: "12px", color: "#a7f3d0", lineHeight: "1.5" }}>
+                  ✓ الموقع متصل بالتخزين السحابي. أي صورة ترفعها أو معلومات تقوم بتعديلها وحفظها هنا ستظهر تلقائياً لجميع الزبائن والأجهزة فوراً!
+                </p>
+              )}
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
@@ -1631,7 +1721,7 @@ export default function AdminPage() {
               </div>
 
               {/* Change Admin PIN */}
-              <div className="admin-badge-item" style={{ gridColumn: "1 / -1" }}>
+              <div className="admin-badge-item">
                 <span style={{ fontSize: "13px", fontWeight: 800, color: "#ffffff", display: "block", marginBottom: "6px" }}>
                   تغيير رمز المرور السري (Admin PIN)
                 </span>
@@ -1647,6 +1737,42 @@ export default function AdminPage() {
                 <p style={{ fontSize: "11.5px", color: "#94a3b8" }}>
                   الرمز الحالي مطلوب لفتح هذه الصفحة في الجلسات القادمة (تذكر الضغط على حفظ التغييرات).
                 </p>
+              </div>
+
+              {/* Reset Local Browser Cache */}
+              <div className="admin-badge-item">
+                <span style={{ fontSize: "13px", fontWeight: 800, color: "#ffffff", display: "block", marginBottom: "6px" }}>
+                  مسح الذاكرة المحلية لجهازك (Reset Local Cache)
+                </span>
+                <p style={{ fontSize: "11.5px", color: "#94a3b8", marginBottom: "14px" }}>
+                  إذا أردت مسح التعديلات المخزنة على هذا المتصفح ومعاينة ما يراه الزبائن وباقي الأجهزة حالياً من السيرفر.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    localStorage.removeItem("bilal_profile_override");
+                    showToast("info", "تم مسح كاش المتصفح وإعادة التحميل...");
+                    setTimeout(() => window.location.reload(), 800);
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    width: "100%",
+                    padding: "11px 16px",
+                    borderRadius: "18px",
+                    background: "rgba(239, 68, 68, 0.15)",
+                    border: "1px solid rgba(239, 68, 68, 0.35)",
+                    color: "#f87171",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  <Trash2 style={{ width: 14, height: 14 }} />
+                  <span>مسح كاش المتصفح واسترجاع السيرفر</span>
+                </button>
               </div>
             </div>
           </div>

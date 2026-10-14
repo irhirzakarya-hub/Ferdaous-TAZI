@@ -82,15 +82,23 @@ export default function HomePage() {
       try {
         const res = await fetch("/api/profile", { cache: "no-store" });
         if (res.ok) {
-          const data: ProfileData = await res.json();
+          const resJson = await res.json();
+          const { _storageCapabilities, ...data } = resJson;
           setProfile(data);
-          const localOverride = localStorage.getItem("bilal_profile_override");
-          if (localOverride) {
-            try {
-              setProfile((prev) => ({ ...prev, ...JSON.parse(localOverride) }));
-            } catch (e) {
-              console.error(e);
+
+          // Only use localOverride if server has no cloud storage configured
+          if (!_storageCapabilities?.isCloudReady) {
+            const localOverride = localStorage.getItem("bilal_profile_override");
+            if (localOverride) {
+              try {
+                setProfile((prev) => ({ ...prev, ...JSON.parse(localOverride) }));
+              } catch (e) {
+                console.error(e);
+              }
             }
+          } else {
+            // Cloud storage is active on Vercel: clean obsolete local override
+            localStorage.removeItem("bilal_profile_override");
           }
         }
       } catch (err) {

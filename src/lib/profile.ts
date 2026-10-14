@@ -6,9 +6,66 @@ import { DEFAULT_PROFILE } from "./constants";
 const DATA_FILE_PATH = path.join(process.cwd(), "data", "profile.json");
 const PUBLIC_DATA_FILE_PATH = path.join(process.cwd(), "public", "data", "profile.json");
 
+const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || "";
+const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || "";
+
 export { DEFAULT_PROFILE };
 
+export function getStorageCapabilities() {
+  return {
+    hasKv: Boolean(KV_URL && KV_TOKEN),
+    hasBlob: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
+    hasGithub: Boolean(process.env.GITHUB_TOKEN),
+    isCloudReady: Boolean(
+      (KV_URL && KV_TOKEN) ||
+      process.env.BLOB_READ_WRITE_TOKEN ||
+      process.env.GITHUB_TOKEN
+    ),
+  };
+}
+
 export async function getProfile(): Promise<ProfileData> {
+  // 1. Try Vercel KV / Upstash Redis (Fastest & direct Key-Value)
+  if (KV_URL && KV_TOKEN) {
+    try {
+      const res = await fetch(`${KV_URL}/get/bilal_profile_data`, {
+        headers: { Authorization: `Bearer ${KV_TOKEN}` },
+        cache: "no-store",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.result) {
+          const parsed = typeof data.result === "string" ? JSON.parse(data.result) : data.result;
+          if (parsed && parsed.businessName) {
+            return parsed;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Could not read profile from KV:", e);
+    }
+  }
+
+  // 2. Try Vercel Blob Storage
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      const { list } = await import("@vercel/blob");
+      const { blobs } = await list({ prefix: "profile-data.json", limit: 1 });
+      if (blobs.length > 0) {
+        const res = await fetch(blobs[0].url, { cache: "no-store" });
+        if (res.ok) {
+          const parsed = await res.json();
+          if (parsed && parsed.businessName) {
+            return parsed;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Could not read profile from Vercel Blob:", e);
+    }
+  }
+
+  // 3. Try Local File System (data/profile.json or public/data/profile.json)
   try {
     if (fs.existsSync(DATA_FILE_PATH)) {
       const raw = await fs.promises.readFile(DATA_FILE_PATH, "utf-8");
@@ -21,10 +78,94 @@ export async function getProfile(): Promise<ProfileData> {
   } catch (error) {
     console.warn("Could not read profile from file system, using fallback", error);
   }
+
   return DEFAULT_PROFILE;
 }
 
-export async function saveProfile(data: ProfileData): Promise<{ success: boolean; isReadOnly?: boolean }> {
+export async function saveProfile(
+  data: ProfileData,
+  options?: { githubToken?: string }
+): Promise<{ success: boolean; isReadOnly?: boolean; storageType?: string }> {
+  let savedToCloud = false;
+  let storageType = "local";
+
+  // 1. Save to Vercel KV / Upstash Redis if configured
+  if (KV_URL && KV_TOKEN) {
+    try {
+      const res = await fetch(`${KV_URL}/set/bilal_profile_data`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${KV_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(JSON.stringify(data)),
+      });
+      if (res.ok) {
+        savedToCloud = true;
+        storageType = "vercel-kv";
+      }
+    } catch (e) {
+      console.warn("Failed to save to KV:", e);
+    }
+  }
+
+  // 2. Save to Vercel Blob if configured
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      const { put } = await import("@vercel/blob");
+      await put("profile-data.json", JSON.stringify(data, null, 2), {
+        access: "public",
+        addRandomSuffix: false,
+      });
+      savedToCloud = true;
+      storageType = storageType === "vercel-kv" ? "kv+blob" : "vercel-blob";
+    } catch (e) {
+      console.warn("Failed to save to Vercel Blob:", e);
+    }
+  }
+
+  // 3. Save to GitHub via API if GitHub token is present
+  const gitToken = options?.githubToken || process.env.GITHUB_TOKEN;
+  if (gitToken) {
+    try {
+      const repo = "irhirzakarya-hub/azilal_bilal_nfc";
+      const filePath = "data/profile.json";
+      let sha = "";
+      const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
+        headers: {
+          Authorization: `Bearer ${gitToken}`,
+          Accept: "application/vnd.github.v3+json",
+        },
+        cache: "no-store",
+      });
+      if (getRes.ok) {
+        const fileInfo = await getRes.json();
+        sha = fileInfo.sha;
+      }
+      const content = Buffer.from(JSON.stringify(data, null, 2)).toString("base64");
+      const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${gitToken}`,
+          Accept: "application/vnd.github.v3+json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: "chore: update profile data from admin dashboard",
+          content,
+          sha: sha || undefined,
+        }),
+      });
+      if (putRes.ok) {
+        savedToCloud = true;
+        storageType = "github";
+      }
+    } catch (e) {
+      console.warn("Failed to save to GitHub:", e);
+    }
+  }
+
+  // 4. Try Local File System (works on local machine, throws on Vercel read-only)
   let savedToFile = false;
   try {
     const jsonString = JSON.stringify(data, null, 2);
@@ -43,11 +184,14 @@ export async function saveProfile(data: ProfileData): Promise<{ success: boolean
 
     savedToFile = true;
   } catch (err) {
-    console.warn("File system write failed (e.g. running on read-only serverless environment):", err);
-    return { success: true, isReadOnly: true };
+    // Expected on Vercel read-only filesystem
   }
 
-  return { success: true, isReadOnly: !savedToFile };
+  return {
+    success: true,
+    isReadOnly: !savedToCloud && !savedToFile,
+    storageType,
+  };
 }
 
 export async function deleteOldImage(imageRelativePath: string): Promise<boolean> {
@@ -56,7 +200,6 @@ export async function deleteOldImage(imageRelativePath: string): Promise<boolean
   }
   try {
     const filename = path.basename(imageRelativePath);
-    // Don't delete initial poster if someone wants to keep it as fallback unless it's an uploaded file
     const filePath = path.join(process.cwd(), "public", "uploads", filename);
     if (fs.existsSync(filePath)) {
       await fs.promises.unlink(filePath);
