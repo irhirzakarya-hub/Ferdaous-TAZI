@@ -96,10 +96,14 @@ export default function AdminPage() {
     isCloudReady: boolean;
   }>({ hasKv: false, hasBlob: false, hasGithub: false, isCloudReady: false });
   const [githubToken, setGithubToken] = useState("");
+  const [isLocalhost, setIsLocalhost] = useState(false);
 
   useEffect(() => {
     const savedToken = localStorage.getItem("bilal_github_token") || "";
     if (savedToken) setGithubToken(savedToken);
+    if (typeof window !== "undefined") {
+      setIsLocalhost(window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+    }
   }, []);
 
   useEffect(() => {
@@ -676,6 +680,57 @@ export default function AdminPage() {
       {/* Main Container */}
       <main style={{ maxWidth: "960px", margin: "0 auto", padding: "18px 16px", position: "relative", zIndex: 10 }}>
         
+        {/* Localhost Warning Notice */}
+        {isLocalhost && (
+          <div
+            style={{
+              background: "linear-gradient(135deg, rgba(245, 158, 11, 0.16) 0%, rgba(180, 83, 9, 0.25) 100%)",
+              border: "1.5px solid rgba(245, 158, 11, 0.6)",
+              borderRadius: "16px",
+              padding: "14px 18px",
+              marginBottom: "16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "12px",
+              flexWrap: "wrap",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span style={{ fontSize: "22px" }}>💻</span>
+              <div>
+                <p style={{ fontSize: "13px", fontWeight: 800, color: "#fbbf24", margin: 0 }}>
+                  تنبيه: أنت الآن على السيرفر التجريبي المحلي (localhost:3000)
+                </p>
+                <p style={{ fontSize: "11.5px", color: "#e2e8f0", margin: "3px 0 0 0" }}>
+                  أي تعديل هنا يُحفظ في حاسوبك فقط ولا يظهر في الهواتف. لتحديث الهواتف وجميع الأجهزة فوراً:
+                </p>
+              </div>
+            </div>
+            <a
+              href="https://azilal-bilal-nfc.vercel.app/admin"
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "8px 16px",
+                borderRadius: "12px",
+                backgroundColor: "#fbbf24",
+                color: "#030712",
+                fontWeight: 800,
+                fontSize: "12px",
+                textDecoration: "none",
+                boxShadow: "0 4px 15px rgba(245, 158, 11, 0.4)",
+              }}
+            >
+              <span>فتح لوحة التحكم المباشرة على Vercel</span>
+              <ExternalLink style={{ width: 14, height: 14 }} />
+            </a>
+          </div>
+        )}
+
         {/* Live Identity Mini-Strip */}
         <div
           style={{
