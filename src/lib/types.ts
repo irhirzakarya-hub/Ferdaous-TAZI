@@ -55,5 +55,7 @@ export interface ProfileData {
   badges: BadgeItem[];
   categories: CategoryItem[];
   socialLinks: SocialLink[];
+  instagram?: string;
+  facebook?: string;
   adminPin: string;
 }

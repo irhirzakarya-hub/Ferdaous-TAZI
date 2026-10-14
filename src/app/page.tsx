@@ -33,6 +33,14 @@ import confetti from "canvas-confetti";
 import { ProfileData } from "@/lib/types";
 import { DEFAULT_PROFILE } from "@/lib/constants";
 import { downloadVCard } from "@/lib/vcard";
+import {
+  InstagramIcon,
+  InstagramGradientIcon,
+  FacebookIcon,
+  FacebookRoundIcon,
+  WhatsAppIcon,
+  WhatsAppRoundIcon,
+} from "@/components/SocialIcons";
 function InstagramVerifiedBadge({ size = 22 }: { size?: number }) {
   return (
     <svg
@@ -151,6 +159,28 @@ export default function HomePage() {
     }
 
     return `https://wa.me/${rawPhone}?text=${encodeURIComponent(text)}`;
+  };
+
+  const instagramUrl =
+    profile.instagram?.trim() ||
+    profile.socialLinks?.find((s) => s.platform === "instagram" && s.url?.trim())?.url?.trim() ||
+    "";
+
+  const facebookUrl =
+    profile.facebook?.trim() ||
+    profile.socialLinks?.find((s) => s.platform === "facebook" && s.url?.trim())?.url?.trim() ||
+    "";
+
+  const hasInstagram = Boolean(instagramUrl);
+  const hasFacebook = Boolean(facebookUrl);
+
+  const getInstagramHandle = (url: string) => {
+    try {
+      const match = url.match(/instagram\.com\/([a-zA-Z0-9._]+)/);
+      return match ? `@${match[1]}` : "@bilal_electronique_212_ma_99";
+    } catch {
+      return "@bilal_electronique_212_ma_99";
+    }
   };
 
 
@@ -574,7 +604,7 @@ export default function HomePage() {
                 rel="noopener noreferrer"
                 className="btn-nfc-whatsapp"
               >
-                <MessageCircle className="anim-icon-whatsapp" style={{ width: 19, height: 19 }} />
+                <WhatsAppIcon className="anim-icon-whatsapp" size={19} />
                 <span>{isAr ? "واتساب مباشر" : "WhatsApp"}</span>
               </a>
 
@@ -587,6 +617,114 @@ export default function HomePage() {
                 <span>{isAr ? "اتصال فوري" : "Appeler"}</span>
               </a>
             </div>
+
+            {/* Social Media Channels (Instagram & Conditional Facebook) */}
+            {(hasInstagram || hasFacebook) && (
+              <div style={{ marginTop: "2px" }}>
+                {hasInstagram && hasFacebook ? (
+                  /* Both Instagram and Facebook available: 2-column luxury grid */
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "10px",
+                    }}
+                  >
+                    <a
+                      id="nfc-instagram-btn"
+                      href={instagramUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-nfc-instagram"
+                    >
+                      <InstagramGradientIcon size={20} />
+                      <span>{isAr ? "إنستغرام" : "Instagram"}</span>
+                    </a>
+
+                    <a
+                      id="nfc-facebook-btn"
+                      href={facebookUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-nfc-facebook"
+                    >
+                      <FacebookRoundIcon size={20} />
+                      <span>{isAr ? "فيسبوك" : "Facebook"}</span>
+                    </a>
+                  </div>
+                ) : hasInstagram ? (
+                  /* Only Instagram available (Facebook hidden from page) */
+                  <a
+                    id="nfc-instagram-banner"
+                    href={instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="instagram-luxury-banner"
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0, flex: 1 }}>
+                      <InstagramGradientIcon size={28} style={{ flexShrink: 0 }} />
+                      <div style={{ minWidth: 0, overflow: "hidden", textAlign: isAr ? "right" : "left" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                          <span style={{ fontSize: "13px", fontWeight: 800, color: "#ffffff", whiteSpace: "nowrap" }}>
+                            {isAr ? "تابعنا على إنستغرام" : "Instagram"}
+                          </span>
+                          <InstagramVerifiedBadge size={15} />
+                        </div>
+                        <p
+                          style={{
+                            fontSize: "10.5px",
+                            color: "#fbcfe8",
+                            marginTop: "1px",
+                            fontFamily: "monospace",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            direction: "ltr",
+                            textAlign: isAr ? "right" : "left",
+                          }}
+                        >
+                          {getInstagramHandle(instagramUrl)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        flexShrink: 0,
+                        padding: "5px 10px",
+                        borderRadius: "10px",
+                        background: "linear-gradient(135deg, #e1306c 0%, #c13584 100%)",
+                        color: "#ffffff",
+                        fontSize: "11px",
+                        fontWeight: 800,
+                        whiteSpace: "nowrap",
+                        boxShadow: "0 3px 10px rgba(225, 48, 108, 0.35)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                      }}
+                    >
+                      <span>{isAr ? "متابعة" : "Suivre"}</span>
+                      <ExternalLink style={{ width: 11, height: 11 }} />
+                    </div>
+                  </a>
+                ) : (
+                  /* Only Facebook available (Instagram hidden) */
+                  <a
+                    id="nfc-facebook-banner"
+                    href={facebookUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-nfc-facebook"
+                    style={{ padding: "14px 18px" }}
+                  >
+                    <FacebookRoundIcon size={22} />
+                    <span>{isAr ? "صفحتنا الرسمية على فيسبوك (Facebook)" : "Notre Page Facebook"}</span>
+                    <ExternalLink style={{ width: 14, height: 14, opacity: 0.8 }} />
+                  </a>
+                )}
+              </div>
+            )}
           </div>
 
           {/* 4. Express Delivery Alert Banner */}
@@ -922,9 +1060,111 @@ export default function HomePage() {
               textAlign: "center",
               display: "flex",
               flexDirection: "column",
-              gap: "6px",
+              gap: "8px",
             }}
           >
+            {/* Quick Social Icons in Footer */}
+            {(hasInstagram || hasFacebook || profile.whatsapp || profile.phone) && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "10px",
+                  marginBottom: "4px",
+                }}
+              >
+                {hasInstagram && (
+                  <a
+                    id="footer-instagram-link"
+                    href={instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Instagram"
+                    style={{
+                      width: "36px",
+                      height: "36px",
+                      borderRadius: "50%",
+                      background: "rgba(225, 48, 108, 0.15)",
+                      border: "1px solid rgba(225, 48, 108, 0.35)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#f43f5e",
+                      transition: "transform 0.2s",
+                    }}
+                  >
+                    <InstagramGradientIcon size={20} />
+                  </a>
+                )}
+
+                {hasFacebook && (
+                  <a
+                    id="footer-facebook-link"
+                    href={facebookUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Facebook"
+                    style={{
+                      width: "36px",
+                      height: "36px",
+                      borderRadius: "50%",
+                      background: "rgba(24, 119, 242, 0.15)",
+                      border: "1px solid rgba(24, 119, 242, 0.35)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#60a5fa",
+                      transition: "transform 0.2s",
+                    }}
+                  >
+                    <FacebookRoundIcon size={20} />
+                  </a>
+                )}
+
+                <a
+                  id="footer-whatsapp-link"
+                  href={getWhatsAppUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="WhatsApp"
+                  style={{
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "50%",
+                    background: "rgba(16, 185, 129, 0.15)",
+                    border: "1px solid rgba(16, 185, 129, 0.35)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#25D366",
+                    transition: "transform 0.2s",
+                  }}
+                >
+                  <WhatsAppIcon size={18} />
+                </a>
+
+                <a
+                  id="footer-phone-link"
+                  href={`tel:${profile.phone}`}
+                  title={isAr ? "اتصال" : "Appeler"}
+                  style={{
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "50%",
+                    background: "rgba(37, 99, 235, 0.15)",
+                    border: "1px solid rgba(37, 99, 235, 0.35)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#60a5fa",
+                  }}
+                >
+                  <Phone style={{ width: 16, height: 16 }} />
+                </a>
+              </div>
+            )}
+
             <p style={{ fontSize: "11px", color: "#64748b" }}>
               © {new Date().getFullYear()} {profile.businessName[lang]} - {profile.city[lang]}
             </p>
@@ -953,7 +1193,7 @@ export default function HomePage() {
             className="btn-nfc-whatsapp"
             style={{ flex: 1, padding: "11px 14px", borderRadius: "16px", fontSize: "13px" }}
           >
-            <MessageCircle className="anim-icon-whatsapp" style={{ width: 16, height: 16 }} />
+            <WhatsAppIcon className="anim-icon-whatsapp" size={17} />
             <span>{isAr ? "واتساب مباشر" : "WhatsApp"}</span>
           </a>
         </div>
@@ -1049,7 +1289,7 @@ export default function HomePage() {
                 className="btn-nfc-whatsapp"
                 style={{ padding: "10px 18px", fontSize: "13px" }}
               >
-                <MessageCircle className="anim-icon-whatsapp" style={{ width: 16, height: 16 }} />
+                <WhatsAppIcon className="anim-icon-whatsapp" size={17} />
                 <span>{isAr ? "تواصل حول العرض" : "Commander"}</span>
               </a>
               <button

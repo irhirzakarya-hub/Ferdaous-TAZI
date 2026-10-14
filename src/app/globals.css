@@ -290,6 +290,92 @@ body {
   transform: scale(0.96) !important;
 }
 
+/* Instagram & Facebook Action Buttons */
+.btn-nfc-instagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 16px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 8px 22px -4px rgba(225, 48, 108, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+  transition: all 0.25s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-nfc-instagram:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -3px rgba(225, 48, 108, 0.65);
+}
+
+.btn-nfc-instagram:active {
+  transform: scale(0.96) !important;
+}
+
+.btn-nfc-facebook {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 16px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #1877f2 0%, #0d5bbd 100%);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 8px 22px -4px rgba(24, 119, 242, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+  transition: all 0.25s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-nfc-facebook:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -3px rgba(24, 119, 242, 0.65);
+}
+
+.btn-nfc-facebook:active {
+  transform: scale(0.96) !important;
+}
+
+.instagram-luxury-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 13px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(131, 58, 180, 0.18) 0%, rgba(253, 29, 29, 0.15) 50%, rgba(252, 176, 69, 0.12) 100%);
+  border: 1.5px solid rgba(225, 48, 108, 0.45);
+  box-shadow: 0 8px 22px -4px rgba(225, 48, 108, 0.25), inset 0 0 15px rgba(225, 48, 108, 0.08);
+  text-decoration: none;
+  color: #ffffff;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.instagram-luxury-banner:hover {
+  transform: translateY(-2px);
+  border-color: rgba(225, 48, 108, 0.7);
+  box-shadow: 0 14px 32px -4px rgba(225, 48, 108, 0.4), inset 0 0 20px rgba(225, 48, 108, 0.15);
+}
+
+.instagram-luxury-banner:active {
+  transform: scale(0.98);
+}
+
 /* ==========================================================================
    2x2 Trust Badges Grid (Designed specifically for Mobile)
    ========================================================================== */

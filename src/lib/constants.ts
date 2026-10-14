@@ -121,7 +121,10 @@ export const DEFAULT_PROFILE: ProfileData = {
   socialLinks: [
     { platform: "whatsapp", label: "WhatsApp", url: "https://wa.me/212620786675", color: "#25D366" },
     { platform: "phone", label: "الهاتف / Téléphone", url: "tel:0620786675", color: "#1d4ed8" },
+    { platform: "instagram", label: "Instagram", url: "https://instagram.com/bilal_electronique_212_ma_99?utm_source=qr&exln=MXVuZ3hydHdjcTRxdg==", color: "#E1306C" },
     { platform: "maps", label: "أزيلال / Google Maps", url: "https://maps.google.com/?q=Azilal,Morocco", color: "#ea4335" },
   ],
+  instagram: "https://instagram.com/bilal_electronique_212_ma_99?utm_source=qr&exln=MXVuZ3hydHdjcTRxdg==",
+  facebook: "",
   adminPin: "2026",
 };

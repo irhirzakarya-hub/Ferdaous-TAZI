@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { ProfileData } from "@/lib/types";
 import { DEFAULT_PROFILE } from "@/lib/constants";
+import { InstagramGradientIcon, FacebookRoundIcon, WhatsAppIcon } from "@/components/SocialIcons";
 
 function InstagramVerifiedBadge({ size = 18 }: { size?: number }) {
   return (
@@ -1295,8 +1296,9 @@ export default function AdminPage() {
 
               {/* WhatsApp Number */}
               <div>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
-                  رقم الواتساب بالصيغة الدولية (مثل: 212620786675)
+                <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
+                  <WhatsAppIcon size={16} style={{ color: "#25D366" }} />
+                  <span>رقم الواتساب بالصيغة الدولية (مثل: 212620786675)</span>
                 </label>
                 <input
                   type="text"
@@ -1325,6 +1327,92 @@ export default function AdminPage() {
                   onChange={(e) => setProfile({ ...profile, mapsUrl: e.target.value })}
                   className="admin-input-field font-mono"
                 />
+              </div>
+
+              {/* Instagram URL */}
+              <div>
+                <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <InstagramGradientIcon size={16} />
+                    <span>رابط حساب إنستغرام (Instagram)</span>
+                  </span>
+                  <span className="admin-lang-chip" style={{ color: "#f43f5e", borderColor: "rgba(225,48,108,0.35)" }}>
+                    نشط على الصفحة
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  dir="ltr"
+                  placeholder="https://instagram.com/..."
+                  value={profile.instagram || ""}
+                  onChange={(e) => {
+                    const newUrl = e.target.value;
+                    const updatedSocial = (profile.socialLinks || []).filter((s) => s.platform !== "instagram");
+                    if (newUrl.trim()) {
+                      updatedSocial.push({
+                        platform: "instagram",
+                        label: "Instagram",
+                        url: newUrl.trim(),
+                        color: "#E1306C",
+                      });
+                    }
+                    setProfile({
+                      ...profile,
+                      instagram: newUrl,
+                      socialLinks: updatedSocial,
+                    });
+                  }}
+                  className="admin-input-field font-mono"
+                />
+                <p style={{ fontSize: "10.5px", color: "#94a3b8", marginTop: "4px" }}>
+                  الرابط الذي يفتح عند نقر الزائر على زر إنستغرام في بطاقة NFC.
+                </p>
+              </div>
+
+              {/* Facebook URL (Conditional) */}
+              <div>
+                <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <FacebookRoundIcon size={16} />
+                    <span>رابط صفحة فيسبوك (Facebook)</span>
+                  </span>
+                  <span
+                    className="admin-lang-chip"
+                    style={{
+                      color: profile.facebook?.trim() ? "#60a5fa" : "#94a3b8",
+                      borderColor: profile.facebook?.trim() ? "rgba(24,119,242,0.4)" : "rgba(255,255,255,0.1)",
+                    }}
+                  >
+                    {profile.facebook?.trim() ? "يظهر في الصفحة ✓" : "مخفي حالياً (فارغ)"}
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  dir="ltr"
+                  placeholder="https://facebook.com/..."
+                  value={profile.facebook || ""}
+                  onChange={(e) => {
+                    const newUrl = e.target.value;
+                    const updatedSocial = (profile.socialLinks || []).filter((s) => s.platform !== "facebook");
+                    if (newUrl.trim()) {
+                      updatedSocial.push({
+                        platform: "facebook",
+                        label: "Facebook",
+                        url: newUrl.trim(),
+                        color: "#1877F2",
+                      });
+                    }
+                    setProfile({
+                      ...profile,
+                      facebook: newUrl,
+                      socialLinks: updatedSocial,
+                    });
+                  }}
+                  className="admin-input-field font-mono"
+                />
+                <p style={{ fontSize: "10.5px", color: "#94a3b8", marginTop: "4px" }}>
+                  💡 في حال توفره يظهر في الصفحة تلقائياً، وفي حال عدم توفره أو تركه فارغاً يتم إخفاؤه تماماً من الصفحة.
+                </p>
               </div>
 
               {/* City AR */}

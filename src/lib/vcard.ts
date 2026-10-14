@@ -18,7 +18,9 @@ export function generateVCard(profile: ProfileData): string {
     `TEL;TYPE=WORK,VOICE:${phone}`,
     `ADR;TYPE=WORK:;;${city};;;;Morocco`,
     `NOTE:${note.replace(/\n/g, "\\n")}`,
-    `URL:${profile.whatsappLink || `https://wa.me/${intlPhone.replace("+", "")}`}`,
+    `URL;TYPE=WhatsApp:${profile.whatsappLink || `https://wa.me/${intlPhone.replace("+", "")}`}`,
+    ...(profile.instagram ? [`URL;TYPE=Instagram:${profile.instagram}`, `X-SOCIALPROFILE;type=instagram:${profile.instagram}`] : []),
+    ...(profile.facebook ? [`URL;TYPE=Facebook:${profile.facebook}`, `X-SOCIALPROFILE;type=facebook:${profile.facebook}`] : []),
     "END:VCARD",
   ].join("\r\n");
 }
