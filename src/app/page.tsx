@@ -917,8 +917,13 @@ export default function HomePage() {
         className="floating-bottom-bar"
       >
         <div
-          className="nfc-mobile-container"
           style={{
+            width: "100%",
+            maxWidth: "480px",
+            marginLeft: "auto",
+            marginRight: "auto",
+            paddingLeft: "16px",
+            paddingRight: "16px",
             display: "grid",
             gridTemplateColumns: "1fr 1fr 1fr auto",
             gap: "8px",
