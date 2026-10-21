@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import {
   motion,
   AnimatePresence,
@@ -18,7 +17,6 @@ import {
   CheckCircle2,
   Copy,
   Check,
-  Lock,
   QrCode,
   Download,
   X,
@@ -441,83 +439,53 @@ export default function HomePage() {
           style={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
+            justifyContent: "flex-end",
+            gap: "8px",
           }}
         >
-          {/* Active Verified Executive Badge */}
-          <motion.div whileHover={{ scale: 1.04 }} className="status-badge-active">
-            <span className="radar-dot" style={{ width: "7px", height: "7px" }} />
-            <span>REMESS</span>
-          </motion.div>
+          {/* QR Code button */}
+          <motion.button
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={() => setQrModalOpen(true)}
+            aria-label="QR Code"
+            style={{
+              width: "35px",
+              height: "35px",
+              borderRadius: "50%",
+              background: "rgba(22, 26, 35, 0.9)",
+              border: "1px solid rgba(255, 255, 255, 0.18)",
+              color: "#e2e8f0",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+            }}
+          >
+            <QrCode style={{ width: 16, height: 16 }} />
+          </motion.button>
 
-          {/* Right Header Controls: QR + Share + Admin */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            {/* QR Code button */}
-            <motion.button
-              whileHover={{ scale: 1.1, rotate: 5 }}
-              whileTap={{ scale: 0.92 }}
-              onClick={() => setQrModalOpen(true)}
-              aria-label="QR Code"
-              style={{
-                width: "35px",
-                height: "35px",
-                borderRadius: "50%",
-                background: "rgba(22, 26, 35, 0.9)",
-                border: "1px solid rgba(255, 255, 255, 0.18)",
-                color: "#e2e8f0",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-              }}
-            >
-              <QrCode style={{ width: 16, height: 16 }} />
-            </motion.button>
-
-            {/* Share button */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.92 }}
-              onClick={handleShareNative}
-              aria-label="Partager"
-              style={{
-                width: "35px",
-                height: "35px",
-                borderRadius: "50%",
-                background: "rgba(22, 26, 35, 0.9)",
-                border: "1px solid rgba(255, 255, 255, 0.18)",
-                color: "#e2e8f0",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-              }}
-            >
-              <Share2 style={{ width: 16, height: 16 }} />
-            </motion.button>
-
-            {/* Admin Key Link */}
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.92 }}>
-              <Link
-                href="/admin"
-                aria-label="Admin Page"
-                style={{
-                  width: "35px",
-                  height: "35px",
-                  borderRadius: "50%",
-                  background: "rgba(22, 26, 35, 0.9)",
-                  border: "1px solid rgba(255, 255, 255, 0.15)",
-                  color: "#94a3b8",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  textDecoration: "none",
-                }}
-              >
-                <Lock style={{ width: 14, height: 14 }} />
-              </Link>
-            </motion.div>
-          </div>
+          {/* Share button */}
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={handleShareNative}
+            aria-label="Partager"
+            style={{
+              width: "35px",
+              height: "35px",
+              borderRadius: "50%",
+              background: "rgba(22, 26, 35, 0.9)",
+              border: "1px solid rgba(255, 255, 255, 0.18)",
+              color: "#e2e8f0",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+            }}
+          >
+            <Share2 style={{ width: 16, height: 16 }} />
+          </motion.button>
         </div>
       </motion.header>
 
