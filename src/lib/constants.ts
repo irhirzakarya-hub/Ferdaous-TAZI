@@ -14,7 +14,7 @@ export const DEFAULT_PROFILE: ProfileData = {
   whatsapp: "0661633888",
   whatsappLink: "https://wa.me/212661633888",
   linkedin: "https://www.linkedin.com/in/ferdaous-tazi-961758361/",
-  posterImage: "/uploads/ferdaous_tazi.jpg",
+  posterImage: "",
   qrCodeImage: "",
   qrCodeUrl: "",
   adminPin: "2026",

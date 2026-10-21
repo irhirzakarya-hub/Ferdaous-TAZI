@@ -46,14 +46,6 @@ export const metadata: Metadata = {
       "Profil professionnel officiel · Directrice exécutive du Réseau Marocain de l'Économie Sociale et Solidaire (REMESS)",
     type: "profile",
     locale: "fr_MA",
-    images: [
-      {
-        url: "/uploads/ferdaous_tazi.jpg",
-        width: 1024,
-        height: 1024,
-        alt: "Mme Ferdaous TAZI - Directrice exécutive REMESS",
-      },
-    ],
   },
 };
 

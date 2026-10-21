@@ -104,13 +104,11 @@ export default function AdminPage() {
 
           if (
             cleanData.posterImage &&
-            (cleanData.posterImage.includes("img-1792") ||
-              cleanData.posterImage.includes("poster.png") ||
-              (!cleanData.posterImage.includes("ferdaous") &&
-                !cleanData.posterImage.includes("blob.vercel-storage.com") &&
-                !cleanData.posterImage.startsWith("data:image/")))
+            (cleanData.posterImage.includes("ferdaous_tazi") ||
+              cleanData.posterImage.includes("img-1792") ||
+              cleanData.posterImage.includes("poster.png"))
           ) {
-            cleanData.posterImage = "/uploads/ferdaous_tazi.jpg";
+            cleanData.posterImage = "";
           }
 
           setProfile(cleanData);
@@ -1259,14 +1257,14 @@ export default function AdminPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          setProfile({ ...profile, posterImage: "/uploads/ferdaous_tazi.jpg" });
-                          showToast("info", "Photo officielle restaurée ! Cliquez sur Enregistrer.");
+                          setProfile({ ...profile, posterImage: "" });
+                          showToast("info", "Mode Épuré (sans photo) activé ! Cliquez sur Enregistrer.");
                         }}
                         className="btn-glass-action"
                         style={{ width: "100%", justifyContent: "center", fontSize: "12px", padding: "9px 14px" }}
                       >
-                        <RefreshCw style={{ width: 14, height: 14, color: "#cbd5e1" }} />
-                        <span>Restaurer la Photo de Ferdaous TAZI</span>
+                        <Trash2 style={{ width: 14, height: 14, color: "#cbd5e1" }} />
+                        <span>Mode Épuré (Sans Photo)</span>
                       </button>
                     </div>
                   </div>

@@ -61,14 +61,14 @@ export function sanitizeProfile(data: any): ProfileData {
       ? data.slogan
       : data.slogan?.fr || "REMESS");
 
-  let posterImage = typeof data.posterImage === "string" ? data.posterImage.trim() : "/uploads/ferdaous_tazi.jpg";
+  let posterImage = typeof data.posterImage === "string" ? data.posterImage.trim() : "";
   if (
     posterImage &&
-    (posterImage.includes("img-1792") ||
-      posterImage.includes("poster.png") ||
-      (!posterImage.includes("ferdaous") && !posterImage.includes("blob.vercel-storage.com") && !posterImage.startsWith("data:image/")))
+    (posterImage.includes("ferdaous_tazi") ||
+      posterImage.includes("img-1792") ||
+      posterImage.includes("poster.png"))
   ) {
-    posterImage = "/uploads/ferdaous_tazi.jpg";
+    posterImage = "";
   }
 
   const phone =

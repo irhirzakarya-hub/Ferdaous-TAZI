@@ -256,13 +256,11 @@ export default function HomePage() {
 
           if (
             sanitized.posterImage &&
-            (sanitized.posterImage.includes("img-1792") ||
-              sanitized.posterImage.includes("poster.png") ||
-              (!sanitized.posterImage.includes("ferdaous") &&
-                !sanitized.posterImage.includes("blob.vercel-storage.com") &&
-                !sanitized.posterImage.startsWith("data:image/")))
+            (sanitized.posterImage.includes("ferdaous_tazi") ||
+              sanitized.posterImage.includes("img-1792") ||
+              sanitized.posterImage.includes("poster.png"))
           ) {
-            sanitized.posterImage = "/uploads/ferdaous_tazi.jpg";
+            sanitized.posterImage = "";
           }
 
           setProfile(sanitized);
@@ -925,94 +923,84 @@ export default function HomePage() {
             paddingLeft: "16px",
             paddingRight: "16px",
             display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr auto",
-            gap: "8px",
+            gridTemplateColumns: "1fr 1fr 1fr 1fr",
+            gap: "10px",
             alignItems: "center",
           }}
         >
-          {/* Call button */}
+          {/* Call button - icon only */}
           <motion.a
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.07 }}
+            whileTap={{ scale: 0.93 }}
             href={`tel:${phoneCallNumber}`}
+            aria-label="Téléphone"
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: "6px",
-              padding: "11px 8px",
+              height: "46px",
               borderRadius: "14px",
               background: "rgba(255, 255, 255, 0.08)",
               border: "1px solid rgba(255, 255, 255, 0.18)",
               color: "#f8fafc",
-              fontSize: "12px",
-              fontWeight: 700,
               textDecoration: "none",
             }}
           >
-            <Phone style={{ width: 14, height: 14 }} />
-            <span>{phoneCallNumber}</span>
+            <Phone style={{ width: 20, height: 20 }} />
           </motion.a>
 
-          {/* WhatsApp */}
+          {/* WhatsApp - icon only */}
           <motion.a
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.07 }}
+            whileTap={{ scale: 0.93 }}
             href={getWhatsAppUrl()}
             target="_blank"
             rel="noopener noreferrer"
+            aria-label="WhatsApp"
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: "6px",
-              padding: "11px 8px",
+              height: "46px",
               borderRadius: "14px",
               background: "rgba(255, 255, 255, 0.08)",
               border: "1px solid rgba(255, 255, 255, 0.18)",
               color: "#f8fafc",
-              fontSize: "12px",
-              fontWeight: 700,
               textDecoration: "none",
             }}
           >
-            <WhatsAppIcon size={14} />
-            <span>WhatsApp</span>
+            <WhatsAppIcon size={20} />
           </motion.a>
 
-          {/* Email */}
+          {/* Email - icon only */}
           <motion.a
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.07 }}
+            whileTap={{ scale: 0.93 }}
             href={`mailto:${emailAddress}`}
+            aria-label="Email"
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: "6px",
-              padding: "11px 8px",
+              height: "46px",
               borderRadius: "14px",
               background: "rgba(255, 255, 255, 0.08)",
               border: "1px solid rgba(255, 255, 255, 0.2)",
               color: "#e2e8f0",
-              fontSize: "12px",
-              fontWeight: 700,
               textDecoration: "none",
             }}
           >
-            <Mail style={{ width: 14, height: 14 }} />
-            <span>Email</span>
+            <Mail style={{ width: 20, height: 20 }} />
           </motion.a>
 
-          {/* Save vCard icon trigger */}
+          {/* Save vCard - icon only */}
           <motion.button
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.92 }}
+            whileHover={{ scale: 1.07 }}
+            whileTap={{ scale: 0.93 }}
             onClick={handleSaveContact}
             aria-label="Save vCard"
             style={{
-              width: "44px",
-              height: "44px",
+              height: "46px",
               borderRadius: "14px",
               background: "var(--gold-gradient)",
               color: "#08090b",
@@ -1024,7 +1012,7 @@ export default function HomePage() {
               boxShadow: "0 4px 14px rgba(255, 255, 255, 0.25)",
             }}
           >
-            <Download style={{ width: 19, height: 19 }} />
+            <Download style={{ width: 20, height: 20 }} />
           </motion.button>
         </div>
       </motion.div>
@@ -1308,7 +1296,7 @@ export default function HomePage() {
               onClick={(e) => e.stopPropagation()}
             >
               <Image
-                src={profile.posterImage || "/uploads/ferdaous_tazi.jpg"}
+                src={profile.posterImage || ""}
                 alt={getName()}
                 fill
                 style={{ objectFit: "cover" }}
