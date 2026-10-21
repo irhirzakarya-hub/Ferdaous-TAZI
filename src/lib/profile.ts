@@ -275,7 +275,7 @@ export async function saveProfile(
   const gitToken = options?.githubToken || process.env.GITHUB_TOKEN;
   if (gitToken) {
     try {
-      const repo = "irhirzakarya-hub/azilal_bilal_nfc";
+      const repo = process.env.GITHUB_REPO || "irhirzakarya-hub/Ferdaous-TAZI";
       const filePath = "data/profile.json";
       let sha = "";
       const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
