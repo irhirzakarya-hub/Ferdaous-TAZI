@@ -54,13 +54,13 @@ function VerifiedBadge({ size = 22 }: { size?: number }) {
           display: "inline-block",
           verticalAlign: "middle",
           flexShrink: 0,
-          filter: "drop-shadow(0 0 10px rgba(229, 192, 110, 0.75))",
+          filter: "drop-shadow(0 0 10px rgba(255, 255, 255, 0.45))",
         }}
       >
-        <circle cx="12" cy="12" r="10.5" fill="#e5c06e" />
+        <circle cx="12" cy="12" r="10.5" fill="#f8fafc" />
         <path
           d="M7.5 12L10.5 15L16.5 9"
-          stroke="#040d0b"
+          stroke="#08090b"
           strokeWidth="2.6"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -158,7 +158,7 @@ function FloatingParticleBackground() {
           width: "380px",
           height: "380px",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(255, 255, 255, 0.12) 0%, transparent 70%)",
           filter: "blur(70px)",
         }}
       />
@@ -182,7 +182,7 @@ function FloatingParticleBackground() {
           width: "360px",
           height: "360px",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(229, 192, 110, 0.2) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(148, 163, 184, 0.14) 0%, transparent 70%)",
           filter: "blur(70px)",
         }}
       />
@@ -351,7 +351,7 @@ export default function HomePage() {
       particleCount: 140,
       spread: 85,
       origin: { y: 0.6 },
-      colors: ["#e5c06e", "#10b981", "#f7df9e", "#ffffff", "#047857"],
+      colors: ["#ffffff", "#e2e8f0", "#94a3b8", "#64748b", "#cbd5e1"],
     });
     downloadVCard(profile);
     setSavedContactDone(true);
@@ -403,7 +403,7 @@ export default function HomePage() {
     currentUrl ||
     (typeof window !== "undefined" ? window.location.origin : "https://www.linkedin.com/in/ferdaous-tazi-961758361/");
 
-  const dynamicQrCode = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&color=040d0b&bgcolor=e5c06e&data=${encodeURIComponent(
+  const dynamicQrCode = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&color=08090b&bgcolor=f1f5f9&data=${encodeURIComponent(
     qrTargetLink
   )}`;
 
@@ -415,7 +415,7 @@ export default function HomePage() {
   return (
     <div
       dir="ltr"
-      className="nfc-page-wrapper selection:bg-[#e5c06e] selection:text-[#040d0b]"
+      className="nfc-page-wrapper selection:bg-[#e2e8f0] selection:text-[#08090b]"
     >
       {/* Background Floating Ambient Particles */}
       <FloatingParticleBackground />
@@ -431,8 +431,8 @@ export default function HomePage() {
           zIndex: 40,
           backdropFilter: "blur(22px)",
           WebkitBackdropFilter: "blur(22px)",
-          backgroundColor: "rgba(4, 13, 11, 0.88)",
-          borderBottom: "1px solid rgba(229, 192, 110, 0.18)",
+          backgroundColor: "rgba(8, 9, 12, 0.94)",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.12)",
           padding: "10px 0",
         }}
       >
@@ -462,9 +462,9 @@ export default function HomePage() {
                 width: "35px",
                 height: "35px",
                 borderRadius: "50%",
-                background: "rgba(11, 33, 28, 0.88)",
-                border: "1px solid rgba(229, 192, 110, 0.25)",
-                color: "#e5c06e",
+                background: "rgba(22, 26, 35, 0.9)",
+                border: "1px solid rgba(255, 255, 255, 0.18)",
+                color: "#e2e8f0",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -484,9 +484,9 @@ export default function HomePage() {
                 width: "35px",
                 height: "35px",
                 borderRadius: "50%",
-                background: "rgba(11, 33, 28, 0.88)",
-                border: "1px solid rgba(229, 192, 110, 0.25)",
-                color: "#f8fafc",
+                background: "rgba(22, 26, 35, 0.9)",
+                border: "1px solid rgba(255, 255, 255, 0.18)",
+                color: "#e2e8f0",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -505,9 +505,9 @@ export default function HomePage() {
                   width: "35px",
                   height: "35px",
                   borderRadius: "50%",
-                  background: "rgba(11, 33, 28, 0.88)",
-                  border: "1px solid rgba(255, 255, 255, 0.08)",
-                  color: "#64748b",
+                  background: "rgba(22, 26, 35, 0.9)",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  color: "#94a3b8",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -558,7 +558,7 @@ export default function HomePage() {
                         height: "128px",
                         borderRadius: "50%",
                         overflow: "hidden",
-                        backgroundColor: "#071714",
+                        backgroundColor: "#0d0f14",
                         zIndex: 1,
                       }}
                     >
@@ -578,7 +578,7 @@ export default function HomePage() {
                         position: "absolute",
                         bottom: "4px",
                         right: "4px",
-                        background: "#040d0b",
+                        background: "#08090b",
                         borderRadius: "50%",
                         padding: "3px",
                         boxShadow: "0 4px 12px rgba(0,0,0,0.7)",
@@ -617,7 +617,7 @@ export default function HomePage() {
                   style={{
                     fontSize: "17px",
                     fontWeight: 700,
-                    color: "#f3d179",
+                    color: "#cbd5e1",
                     marginBottom: "8px",
                     lineHeight: 1.4,
                     letterSpacing: "0.2px",
@@ -636,14 +636,14 @@ export default function HomePage() {
                     gap: "7px",
                     padding: "6px 18px",
                     borderRadius: "30px",
-                    background: "rgba(16, 185, 129, 0.16)",
-                    border: "1px solid rgba(16, 185, 129, 0.4)",
-                    color: "#34d399",
+                    background: "rgba(255, 255, 255, 0.08)",
+                    border: "1px solid rgba(255, 255, 255, 0.22)",
+                    color: "#f8fafc",
                     fontSize: "13px",
                     fontWeight: 800,
                     letterSpacing: "0.6px",
                     marginBottom: "20px",
-                    boxShadow: "0 0 16px rgba(16, 185, 129, 0.15)",
+                    boxShadow: "0 0 16px rgba(255, 255, 255, 0.1)",
                   }}
                 >
                   <Building2 style={{ width: 14, height: 14, flexShrink: 0 }} />
@@ -661,7 +661,7 @@ export default function HomePage() {
                 >
                   {savedContactDone ? (
                     <>
-                      <CheckCircle2 style={{ width: 20, height: 20, color: "#040d0b" }} />
+                      <CheckCircle2 style={{ width: 20, height: 20, color: "#08090b" }} />
                       <span>✓ Contact Enregistré !</span>
                     </>
                   ) : (
@@ -710,9 +710,9 @@ export default function HomePage() {
                   width: "38px",
                   height: "38px",
                   borderRadius: "12px",
-                  background: "rgba(16, 185, 129, 0.16)",
-                  border: "1px solid rgba(16, 185, 129, 0.35)",
-                  color: "#34d399",
+                  background: "rgba(255, 255, 255, 0.08)",
+                  border: "1px solid rgba(255, 255, 255, 0.18)",
+                  color: "#f8fafc",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -752,9 +752,9 @@ export default function HomePage() {
                   width: "38px",
                   height: "38px",
                   borderRadius: "12px",
-                  background: "rgba(37, 211, 102, 0.16)",
-                  border: "1px solid rgba(37, 211, 102, 0.35)",
-                  color: "#25D366",
+                  background: "rgba(255, 255, 255, 0.08)",
+                  border: "1px solid rgba(255, 255, 255, 0.18)",
+                  color: "#f8fafc",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -765,7 +765,7 @@ export default function HomePage() {
               </div>
               <div style={{ textAlign: "left", overflow: "hidden" }}>
                 <div style={{ fontSize: "11px", color: "#94a3b8" }}>WhatsApp</div>
-                <div style={{ fontSize: "13px", fontWeight: 700, color: "#25D366", whiteSpace: "nowrap" }}>
+                <div style={{ fontSize: "13px", fontWeight: 700, color: "#ffffff", whiteSpace: "nowrap" }}>
                   {whatsappNumber}
                 </div>
               </div>
@@ -790,9 +790,9 @@ export default function HomePage() {
                   width: "38px",
                   height: "38px",
                   borderRadius: "12px",
-                  background: "rgba(229, 192, 110, 0.16)",
-                  border: "1px solid rgba(229, 192, 110, 0.35)",
-                  color: "#e5c06e",
+                  background: "rgba(255, 255, 255, 0.08)",
+                  border: "1px solid rgba(255, 255, 255, 0.18)",
+                  color: "#e2e8f0",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -839,9 +839,9 @@ export default function HomePage() {
                   width: "38px",
                   height: "38px",
                   borderRadius: "12px",
-                  background: "rgba(10, 102, 194, 0.2)",
-                  border: "1px solid rgba(10, 102, 194, 0.4)",
-                  color: "#38bdf8",
+                  background: "rgba(255, 255, 255, 0.08)",
+                  border: "1px solid rgba(255, 255, 255, 0.18)",
+                  color: "#f8fafc",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -852,7 +852,7 @@ export default function HomePage() {
               </div>
               <div style={{ textAlign: "left", overflow: "hidden" }}>
                 <div style={{ fontSize: "11px", color: "#94a3b8" }}>LinkedIn</div>
-                <div style={{ fontSize: "13px", fontWeight: 700, color: "#38bdf8", whiteSpace: "nowrap" }}>
+                <div style={{ fontSize: "13px", fontWeight: 700, color: "#ffffff", whiteSpace: "nowrap" }}>
                   Ferdaous TAZI
                 </div>
               </div>
@@ -881,12 +881,12 @@ export default function HomePage() {
                 width: "40px",
                 height: "40px",
                 borderRadius: "12px",
-                background: "rgba(16, 185, 129, 0.16)",
-                border: "1px solid rgba(16, 185, 129, 0.3)",
+                background: "rgba(255, 255, 255, 0.08)",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#10b981",
+                color: "#e2e8f0",
               }}
             >
               <UserCheck style={{ width: 20, height: 20 }} />
@@ -895,7 +895,7 @@ export default function HomePage() {
               <h2 style={{ fontSize: "17px", fontWeight: 800, color: "#ffffff" }}>
                 Profil & Mission
               </h2>
-              <p style={{ fontSize: "11px", color: "#e5c06e" }}>Ferdaous TAZI · REMESS</p>
+              <p style={{ fontSize: "11px", color: "#94a3b8" }}>Ferdaous TAZI · REMESS</p>
             </div>
           </div>
 
@@ -969,9 +969,9 @@ export default function HomePage() {
               gap: "6px",
               padding: "11px 8px",
               borderRadius: "14px",
-              background: "rgba(16, 185, 129, 0.18)",
-              border: "1px solid rgba(16, 185, 129, 0.35)",
-              color: "#34d399",
+              background: "rgba(255, 255, 255, 0.08)",
+              border: "1px solid rgba(255, 255, 255, 0.18)",
+              color: "#f8fafc",
               fontSize: "12px",
               fontWeight: 700,
               textDecoration: "none",
@@ -995,9 +995,9 @@ export default function HomePage() {
               gap: "6px",
               padding: "11px 8px",
               borderRadius: "14px",
-              background: "rgba(37, 211, 102, 0.18)",
-              border: "1px solid rgba(37, 211, 102, 0.35)",
-              color: "#25D366",
+              background: "rgba(255, 255, 255, 0.08)",
+              border: "1px solid rgba(255, 255, 255, 0.18)",
+              color: "#f8fafc",
               fontSize: "12px",
               fontWeight: 700,
               textDecoration: "none",
@@ -1019,9 +1019,9 @@ export default function HomePage() {
               gap: "6px",
               padding: "11px 8px",
               borderRadius: "14px",
-              background: "rgba(229, 192, 110, 0.18)",
-              border: "1px solid rgba(229, 192, 110, 0.35)",
-              color: "#e5c06e",
+              background: "rgba(255, 255, 255, 0.08)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              color: "#e2e8f0",
               fontSize: "12px",
               fontWeight: 700,
               textDecoration: "none",
@@ -1042,13 +1042,13 @@ export default function HomePage() {
               height: "44px",
               borderRadius: "14px",
               background: "var(--gold-gradient)",
-              color: "#040d0b",
+              color: "#08090b",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               border: "none",
               cursor: "pointer",
-              boxShadow: "0 4px 14px rgba(229, 192, 110, 0.45)",
+              boxShadow: "0 4px 14px rgba(255, 255, 255, 0.25)",
             }}
           >
             <Download style={{ width: 19, height: 19 }} />
@@ -1079,7 +1079,7 @@ export default function HomePage() {
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <QrCode style={{ width: 20, height: 20, color: "#e5c06e" }} />
+                  <QrCode style={{ width: 20, height: 20, color: "#f8fafc" }} />
                   <h3 style={{ fontSize: "16px", fontWeight: 800, color: "#ffffff" }}>
                     QR Code
                   </h3>
@@ -1125,7 +1125,7 @@ export default function HomePage() {
                 <div style={{ fontSize: "15px", fontWeight: 800, color: "#ffffff" }}>
                   {getName()}
                 </div>
-                <div style={{ fontSize: "12px", color: "#e5c06e" }}>
+                <div style={{ fontSize: "12px", color: "#cbd5e1" }}>
                   {getTitle()} · {getOrg()}
                 </div>
                 <div
@@ -1138,7 +1138,7 @@ export default function HomePage() {
                     wordBreak: "break-all",
                   }}
                 >
-                  <span style={{ color: "#e5c06e" }}>Destination : </span>
+                  <span style={{ color: "#cbd5e1" }}>Destination : </span>
                   {qrTargetLink}
                 </div>
               </div>
@@ -1170,7 +1170,7 @@ export default function HomePage() {
                     const downloadUrl =
                       profile.qrCodeImage && profile.qrCodeImage.trim()
                         ? profile.qrCodeImage
-                        : `https://api.qrserver.com/v1/create-qr-code/?size=600x600&color=040d0b&bgcolor=e5c06e&data=${encodeURIComponent(
+                        : `https://api.qrserver.com/v1/create-qr-code/?size=600x600&color=08090b&bgcolor=f1f5f9&data=${encodeURIComponent(
                             qrTargetLink
                           )}`;
                     const a = document.createElement("a");
@@ -1184,7 +1184,7 @@ export default function HomePage() {
                   className="btn-glass-action"
                   style={{ width: "100%", justifyContent: "center", fontSize: "12px", padding: "10px" }}
                 >
-                  <Download style={{ width: 15, height: 15, color: "#e5c06e" }} />
+                  <Download style={{ width: 15, height: 15, color: "#cbd5e1" }} />
                   <span>Télécharger le QR Code (PNG)</span>
                 </button>
               </div>
@@ -1211,7 +1211,7 @@ export default function HomePage() {
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <Share2 style={{ width: 20, height: 20, color: "#e5c06e" }} />
+                  <Share2 style={{ width: 20, height: 20, color: "#f8fafc" }} />
                   <h3 style={{ fontSize: "16px", fontWeight: 800, color: "#ffffff" }}>
                     Partager la Carte
                   </h3>
@@ -1235,7 +1235,7 @@ export default function HomePage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-glass-action"
-                  style={{ justifyContent: "flex-start", gap: "12px", color: "#25D366" }}
+                  style={{ justifyContent: "flex-start", gap: "12px", color: "#f8fafc" }}
                 >
                   <WhatsAppRoundIcon size={24} />
                   <span style={{ color: "#ffffff" }}>WhatsApp</span>
@@ -1272,11 +1272,11 @@ export default function HomePage() {
                       width: "24px",
                       height: "24px",
                       borderRadius: "50%",
-                      background: "#e5c06e",
+                      background: "#f8fafc",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      color: "#040d0b",
+                      color: "#08090b",
                     }}
                   >
                     <Mail style={{ width: 14, height: 14 }} />
@@ -1329,7 +1329,7 @@ export default function HomePage() {
                 aspectRatio: "1/1",
                 borderRadius: "26px",
                 overflow: "hidden",
-                border: "2px solid #e5c06e",
+                border: "2px solid #e2e8f0",
                 boxShadow: "0 25px 60px rgba(0,0,0,0.85)",
               }}
               onClick={(e) => e.stopPropagation()}

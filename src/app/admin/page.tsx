@@ -342,9 +342,9 @@ export default function AdminPage() {
               width: "64px",
               height: "64px",
               borderRadius: "20px",
-              background: "rgba(229, 192, 110, 0.15)",
-              border: "1px solid rgba(229, 192, 110, 0.35)",
-              color: "#e5c06e",
+              background: "rgba(255, 255, 255, 0.08)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              color: "#f8fafc",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -357,7 +357,7 @@ export default function AdminPage() {
           <h2 style={{ fontSize: "22px", fontWeight: 800, color: "#ffffff", marginBottom: "6px" }}>
             Espace Administration
           </h2>
-          <p style={{ fontSize: "13px", color: "#e5c06e", marginBottom: "4px", fontWeight: 700 }}>
+          <p style={{ fontSize: "13px", color: "#cbd5e1", marginBottom: "4px", fontWeight: 700 }}>
             Ferdaous TAZI · REMESS
           </p>
           <p style={{ fontSize: "12px", color: "#94a3b8", marginBottom: "24px" }}>
@@ -378,8 +378,8 @@ export default function AdminPage() {
                   width: "100%",
                   padding: "15px 18px",
                   borderRadius: "15px",
-                  background: "rgba(4, 13, 11, 0.9)",
-                  border: pinError ? "2px solid #ef4444" : "1px solid rgba(229, 192, 110, 0.35)",
+                  background: "rgba(12, 14, 19, 0.92)",
+                  border: pinError ? "2px solid #ef4444" : "1px solid rgba(255, 255, 255, 0.2)",
                   color: "#ffffff",
                   fontSize: "17px",
                   textAlign: "center",
@@ -483,8 +483,8 @@ export default function AdminPage() {
           top: 0,
           zIndex: 40,
           backdropFilter: "blur(22px)",
-          backgroundColor: "rgba(4, 13, 11, 0.9)",
-          borderBottom: "1px solid rgba(229, 192, 110, 0.2)",
+          backgroundColor: "rgba(8, 9, 12, 0.94)",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.12)",
           padding: "12px 0",
         }}
       >
@@ -502,11 +502,11 @@ export default function AdminPage() {
                 width: "38px",
                 height: "38px",
                 borderRadius: "12px",
-                background: "rgba(229, 192, 110, 0.2)",
+                background: "rgba(255, 255, 255, 0.08)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#e5c06e",
+                color: "#f8fafc",
               }}
             >
               <Shield style={{ width: 20, height: 20 }} />
@@ -515,7 +515,7 @@ export default function AdminPage() {
               <div style={{ fontSize: "14.5px", fontWeight: 800, color: "#ffffff" }}>
                 Tableau de Bord REMESS
               </div>
-              <div style={{ fontSize: "11px", color: "#e5c06e" }}>
+              <div style={{ fontSize: "11px", color: "#cbd5e1" }}>
                 Ferdaous TAZI · Administration
               </div>
             </div>
@@ -533,8 +533,8 @@ export default function AdminPage() {
                   gap: "6px",
                   padding: "9px 15px",
                   borderRadius: "14px",
-                  background: "rgba(11, 33, 28, 0.85)",
-                  border: "1px solid rgba(229, 192, 110, 0.3)",
+                  background: "rgba(22, 26, 35, 0.85)",
+                  border: "1px solid rgba(255, 255, 255, 0.16)",
                   color: "#f8fafc",
                   fontSize: "12px",
                   fontWeight: 600,
@@ -617,11 +617,11 @@ export default function AdminPage() {
                   gap: "8px",
                   padding: "10px 16px",
                   borderRadius: "14px",
-                  background: active ? "var(--gold-gradient)" : "rgba(11, 33, 28, 0.7)",
+                  background: active ? "var(--gold-gradient)" : "rgba(18, 21, 28, 0.75)",
                   border: active
-                    ? "1px solid rgba(229, 192, 110, 0.6)"
+                    ? "1px solid rgba(255, 255, 255, 0.45)"
                     : "1px solid rgba(255, 255, 255, 0.08)",
-                  color: active ? "#040d0b" : "#94a3b8",
+                  color: active ? "#08090b" : "#94a3b8",
                   fontSize: "13px",
                   fontWeight: 700,
                   whiteSpace: "nowrap",
@@ -655,7 +655,7 @@ export default function AdminPage() {
 
               {/* Name */}
               <div style={{ marginBottom: "16px" }}>
-                <label style={{ display: "block", fontSize: "12px", color: "#e5c06e", fontWeight: 700, marginBottom: "6px" }}>
+                <label style={{ display: "block", fontSize: "12px", color: "#cbd5e1", fontWeight: 700, marginBottom: "6px" }}>
                   Nom & Prénom
                 </label>
                 <input
@@ -673,7 +673,7 @@ export default function AdminPage() {
 
               {/* Directrice executive field under name */}
               <div style={{ marginBottom: "16px" }}>
-                <label style={{ display: "block", fontSize: "12.5px", color: "#e5c06e", fontWeight: 700, marginBottom: "6px" }}>
+                <label style={{ display: "block", fontSize: "12.5px", color: "#cbd5e1", fontWeight: 700, marginBottom: "6px" }}>
                   Directrice executive
                 </label>
                 <input
@@ -696,7 +696,7 @@ export default function AdminPage() {
 
               {/* REMESS field under title */}
               <div style={{ marginBottom: "18px" }}>
-                <label style={{ display: "block", fontSize: "12.5px", color: "#e5c06e", fontWeight: 700, marginBottom: "6px" }}>
+                <label style={{ display: "block", fontSize: "12.5px", color: "#cbd5e1", fontWeight: 700, marginBottom: "6px" }}>
                   REMESS
                 </label>
                 <input
@@ -719,7 +719,7 @@ export default function AdminPage() {
 
               {/* Presentation Text */}
               <div style={{ marginBottom: "20px" }}>
-                <label style={{ display: "block", fontSize: "12px", color: "#e5c06e", fontWeight: 700, marginBottom: "6px" }}>
+                <label style={{ display: "block", fontSize: "12px", color: "#cbd5e1", fontWeight: 700, marginBottom: "6px" }}>
                   Texte de Présentation Officiel
                 </label>
                 <textarea
@@ -737,7 +737,7 @@ export default function AdminPage() {
 
               {/* Admin PIN */}
               <div style={{ maxWidth: "300px" }}>
-                <label style={{ display: "block", fontSize: "12px", color: "#e5c06e", fontWeight: 700, marginBottom: "6px" }}>
+                <label style={{ display: "block", fontSize: "12px", color: "#cbd5e1", fontWeight: 700, marginBottom: "6px" }}>
                   Code PIN Administrateur
                 </label>
                 <input
@@ -768,7 +768,7 @@ export default function AdminPage() {
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
                 {/* Phone */}
                 <div>
-                  <label style={{ display: "block", fontSize: "12.5px", color: "#e5c06e", fontWeight: 700, marginBottom: "6px" }}>
+                  <label style={{ display: "block", fontSize: "12.5px", color: "#cbd5e1", fontWeight: 700, marginBottom: "6px" }}>
                     Téléphone (Appels)
                   </label>
                   <input
@@ -791,7 +791,7 @@ export default function AdminPage() {
 
                 {/* WhatsApp */}
                 <div>
-                  <label style={{ display: "block", fontSize: "12.5px", color: "#e5c06e", fontWeight: 700, marginBottom: "6px" }}>
+                  <label style={{ display: "block", fontSize: "12.5px", color: "#cbd5e1", fontWeight: 700, marginBottom: "6px" }}>
                     WhatsApp (Messagerie)
                   </label>
                   <input
@@ -817,7 +817,7 @@ export default function AdminPage() {
 
                 {/* Email */}
                 <div>
-                  <label style={{ display: "block", fontSize: "12.5px", color: "#e5c06e", fontWeight: 700, marginBottom: "6px" }}>
+                  <label style={{ display: "block", fontSize: "12.5px", color: "#cbd5e1", fontWeight: 700, marginBottom: "6px" }}>
                     Adresse Email (F.tazi@remess.ma)
                   </label>
                   <input
@@ -834,7 +834,7 @@ export default function AdminPage() {
 
                 {/* LinkedIn */}
                 <div style={{ gridColumn: "1 / -1" }}>
-                  <label style={{ display: "block", fontSize: "12.5px", color: "#e5c06e", fontWeight: 700, marginBottom: "6px" }}>
+                  <label style={{ display: "block", fontSize: "12.5px", color: "#cbd5e1", fontWeight: 700, marginBottom: "6px" }}>
                     Lien Profil LinkedIn
                   </label>
                   <input
@@ -864,7 +864,7 @@ export default function AdminPage() {
               style={{ padding: "26px 22px" }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
-                <QrCode style={{ width: 22, height: 22, color: "#e5c06e" }} />
+                <QrCode style={{ width: 22, height: 22, color: "#f8fafc" }} />
                 <h3 style={{ fontSize: "17px", fontWeight: 800, color: "#ffffff", margin: 0 }}>
                   Gestion & Liaison du QR Code
                 </h3>
@@ -878,7 +878,7 @@ export default function AdminPage() {
                 <div>
                   {/* Target URL Input */}
                   <div style={{ marginBottom: "20px" }}>
-                    <label style={{ display: "block", fontSize: "12.5px", color: "#e5c06e", fontWeight: 700, marginBottom: "6px" }}>
+                    <label style={{ display: "block", fontSize: "12.5px", color: "#cbd5e1", fontWeight: 700, marginBottom: "6px" }}>
                       Lien de Destination du QR Code (URL cible)
                     </label>
                     <input
@@ -970,13 +970,13 @@ export default function AdminPage() {
                   {/* Custom Uploaded QR Code Image */}
                   <div
                     style={{
-                      background: "rgba(4, 13, 11, 0.6)",
-                      border: "1px dashed rgba(229, 192, 110, 0.35)",
+                      background: "rgba(12, 14, 19, 0.7)",
+                      border: "1px dashed rgba(255, 255, 255, 0.2)",
                       borderRadius: "14px",
                       padding: "16px",
                     }}
                   >
-                    <span style={{ display: "block", fontSize: "12px", color: "#e5c06e", fontWeight: 700, marginBottom: "4px" }}>
+                    <span style={{ display: "block", fontSize: "12px", color: "#cbd5e1", fontWeight: 700, marginBottom: "4px" }}>
                       Image Personnalisée du QR Code (Optionnel)
                     </span>
                     <p style={{ fontSize: "11px", color: "#94a3b8", marginBottom: "12px", lineHeight: 1.5 }}>
@@ -1031,8 +1031,8 @@ export default function AdminPage() {
                 {/* Right side: Live QR Preview Card */}
                 <div
                   style={{
-                    background: "radial-gradient(ellipse at top, rgba(16, 44, 38, 0.7), rgba(4, 13, 11, 0.95))",
-                    border: "1px solid rgba(229, 192, 110, 0.25)",
+                    background: "radial-gradient(ellipse at top, rgba(28, 32, 42, 0.85), rgba(8, 9, 12, 0.98))",
+                    border: "1px solid rgba(255, 255, 255, 0.14)",
                     borderRadius: "18px",
                     padding: "20px",
                     display: "flex",
@@ -1042,7 +1042,7 @@ export default function AdminPage() {
                     textAlign: "center",
                   }}
                 >
-                  <span style={{ fontSize: "12px", fontWeight: 700, color: "#e5c06e", marginBottom: "14px", textTransform: "uppercase", letterSpacing: "1px" }}>
+                  <span style={{ fontSize: "12px", fontWeight: 700, color: "#cbd5e1", marginBottom: "14px", textTransform: "uppercase", letterSpacing: "1px" }}>
                     Aperçu en Direct du QR Code
                   </span>
 
@@ -1059,7 +1059,7 @@ export default function AdminPage() {
                       src={
                         profile.qrCodeImage && profile.qrCodeImage.trim()
                           ? profile.qrCodeImage
-                          : `https://api.qrserver.com/v1/create-qr-code/?size=400x400&color=040d0b&bgcolor=e5c06e&data=${encodeURIComponent(
+                          : `https://api.qrserver.com/v1/create-qr-code/?size=400x400&color=08090b&bgcolor=f1f5f9&data=${encodeURIComponent(
                               (profile.qrCodeUrl && profile.qrCodeUrl.trim()) ||
                               (typeof window !== "undefined" ? window.location.origin : "https://remess.ma")
                             )}`
@@ -1082,7 +1082,7 @@ export default function AdminPage() {
                         const qrUrlToDownload =
                           profile.qrCodeImage && profile.qrCodeImage.trim()
                             ? profile.qrCodeImage
-                            : `https://api.qrserver.com/v1/create-qr-code/?size=600x600&color=040d0b&bgcolor=e5c06e&data=${encodeURIComponent(
+                            : `https://api.qrserver.com/v1/create-qr-code/?size=600x600&color=08090b&bgcolor=f1f5f9&data=${encodeURIComponent(
                                 (profile.qrCodeUrl && profile.qrCodeUrl.trim()) ||
                                 (typeof window !== "undefined" ? window.location.origin : "https://remess.ma")
                               )}`;
@@ -1099,7 +1099,7 @@ export default function AdminPage() {
                       className="btn-glass-action"
                       style={{ fontSize: "11.5px", padding: "8px 12px" }}
                     >
-                      <Download style={{ width: 14, height: 14, color: "#e5c06e" }} />
+                      <Download style={{ width: 14, height: 14, color: "#cbd5e1" }} />
                       <span>Télécharger PNG</span>
                     </button>
 
@@ -1151,9 +1151,9 @@ export default function AdminPage() {
                   margin: "0 auto",
                   textAlign: "center",
                   padding: "26px 20px",
-                  background: "rgba(4, 13, 11, 0.7)",
+                  background: "rgba(12, 14, 19, 0.8)",
                   borderRadius: "20px",
-                  border: "1px solid rgba(229, 192, 110, 0.2)",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
                 }}
               >
                 {profile.posterImage && profile.posterImage.trim() ? (
@@ -1166,8 +1166,8 @@ export default function AdminPage() {
                         borderRadius: "50%",
                         overflow: "hidden",
                         margin: "0 auto 18px",
-                        border: "3px solid #e5c06e",
-                        boxShadow: "0 0 20px rgba(229, 192, 110, 0.3)",
+                        border: "3px solid #cbd5e1",
+                        boxShadow: "0 0 25px rgba(255, 255, 255, 0.25)",
                       }}
                     >
                       <Image
@@ -1226,14 +1226,14 @@ export default function AdminPage() {
                         height: "80px",
                         borderRadius: "50%",
                         margin: "0 auto 14px",
-                        background: "rgba(229, 192, 110, 0.08)",
-                        border: "1px dashed rgba(229, 192, 110, 0.35)",
+                        background: "rgba(255, 255, 255, 0.05)",
+                        border: "1px dashed rgba(255, 255, 255, 0.22)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                       }}
                     >
-                      <ImageIcon style={{ width: 34, height: 34, color: "#e5c06e" }} />
+                      <ImageIcon style={{ width: 34, height: 34, color: "#cbd5e1" }} />
                     </div>
 
                     <span style={{ fontSize: "14px", fontWeight: 700, color: "#ffffff", display: "block", marginBottom: "6px" }}>
@@ -1265,7 +1265,7 @@ export default function AdminPage() {
                         className="btn-glass-action"
                         style={{ width: "100%", justifyContent: "center", fontSize: "12px", padding: "9px 14px" }}
                       >
-                        <RefreshCw style={{ width: 14, height: 14, color: "#e5c06e" }} />
+                        <RefreshCw style={{ width: 14, height: 14, color: "#cbd5e1" }} />
                         <span>Restaurer la Photo de Ferdaous TAZI</span>
                       </button>
                     </div>
@@ -1392,8 +1392,8 @@ const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "12px 14px",
   borderRadius: "12px",
-  background: "rgba(4, 13, 11, 0.85)",
-  border: "1px solid rgba(229, 192, 110, 0.25)",
+  background: "rgba(12, 14, 19, 0.88)",
+  border: "1px solid rgba(255, 255, 255, 0.15)",
   color: "#ffffff",
   fontSize: "13px",
   outline: "none",
