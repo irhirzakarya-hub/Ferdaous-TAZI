@@ -24,15 +24,95 @@ export function getStorageCapabilities() {
   };
 }
 
+export function sanitizeProfile(data: any): ProfileData {
+  if (!data || typeof data !== "object") return DEFAULT_PROFILE;
+
+  const rawBusinessName =
+    typeof data.businessName === "string"
+      ? data.businessName
+      : data.businessName?.fr || data.businessName?.ar || "";
+
+  const rawDesc =
+    typeof data.description === "string"
+      ? data.description
+      : data.description?.fr || data.description?.ar || "";
+
+  // If data has legacy Bilal text, literie, or old phone: wipe it completely
+  const isLegacyBilal =
+    rawBusinessName.toLowerCase().includes("bilal") ||
+    rawDesc.toLowerCase().includes("bilal") ||
+    rawDesc.toLowerCase().includes("literie") ||
+    String(data.phone || "").includes("0620786675") ||
+    String(data.phone || "").includes("06.20.78");
+
+  if (isLegacyBilal) {
+    return DEFAULT_PROFILE;
+  }
+
+  const title =
+    (typeof data.title === "string" && data.title) ||
+    (typeof data.subtitle === "string"
+      ? data.subtitle
+      : data.subtitle?.fr || "Directrice executive");
+
+  const organization =
+    (typeof data.organization === "string" && data.organization) ||
+    (typeof data.slogan === "string"
+      ? data.slogan
+      : data.slogan?.fr || "REMESS");
+
+  let posterImage = data.posterImage || "/uploads/ferdaous_tazi.jpg";
+  if (
+    posterImage.includes("img-1792") ||
+    posterImage.includes("poster.png") ||
+    !posterImage.includes("ferdaous")
+  ) {
+    posterImage = "/uploads/ferdaous_tazi.jpg";
+  }
+
+  const phone =
+    data.phone && !String(data.phone).includes("062078")
+      ? String(data.phone).trim()
+      : "0661633888";
+
+  const whatsapp =
+    data.whatsapp && !String(data.whatsapp).includes("062078")
+      ? String(data.whatsapp).trim()
+      : phone;
+
+  const rawWa = whatsapp.replace(/[^0-9]/g, "");
+  const intlWa = rawWa.startsWith("0") ? `212${rawWa.slice(1)}` : rawWa;
+
+  return {
+    ...DEFAULT_PROFILE,
+    ...data,
+    businessName: data.businessName || "Ferdaous TAZI",
+    title: title || "Directrice executive",
+    organization: organization || "REMESS",
+    subtitle: title || "Directrice executive",
+    slogan: organization || "REMESS",
+    phone,
+    phoneDisplay: data.phoneDisplay || phone,
+    whatsapp,
+    whatsappLink: `https://wa.me/${intlWa}`,
+    email: data.email || "F.tazi@remess.ma",
+    linkedin: data.linkedin || "https://www.linkedin.com/in/ferdaous-tazi-961758361/",
+    posterImage,
+    qrCodeImage: data.qrCodeImage ?? "",
+    qrCodeUrl: data.qrCodeUrl ?? "",
+    adminPin: data.adminPin || "2026",
+  };
+}
+
 async function getLocalFallbackProfile(): Promise<ProfileData> {
   try {
     if (fs.existsSync(DATA_FILE_PATH)) {
       const raw = await fs.promises.readFile(DATA_FILE_PATH, "utf-8");
-      return JSON.parse(raw);
+      return sanitizeProfile(JSON.parse(raw));
     }
     if (fs.existsSync(PUBLIC_DATA_FILE_PATH)) {
       const raw = await fs.promises.readFile(PUBLIC_DATA_FILE_PATH, "utf-8");
-      return JSON.parse(raw);
+      return sanitizeProfile(JSON.parse(raw));
     }
   } catch (error) {
     console.warn("Could not read profile from file system, using fallback", error);
@@ -44,7 +124,7 @@ export async function getProfile(): Promise<ProfileData> {
   // 1. Try Vercel KV / Upstash Redis (Fastest & direct Key-Value)
   if (KV_URL && KV_TOKEN) {
     try {
-      const res = await fetch(`${KV_URL}/get/bilal_profile_data`, {
+      const res = await fetch(`${KV_URL}/get/ferdaous_profile_data`, {
         headers: { Authorization: `Bearer ${KV_TOKEN}` },
         cache: "no-store",
       });
@@ -53,7 +133,7 @@ export async function getProfile(): Promise<ProfileData> {
         if (data && data.result) {
           const parsed = typeof data.result === "string" ? JSON.parse(data.result) : data.result;
           if (parsed && parsed.businessName) {
-            return parsed;
+            return sanitizeProfile(parsed);
           }
         }
       }
@@ -84,23 +164,28 @@ export async function getProfile(): Promise<ProfileData> {
         if (res.ok) {
           const parsed = await res.json();
           if (parsed && parsed.businessName) {
-            return parsed;
+            return sanitizeProfile(parsed);
           }
         }
       }
 
-      // Auto-recovery: If profile-data.json does not exist yet, but image blobs were uploaded to uploads/
+      // Auto-recovery: Only accept new ferdaous image blobs
       const imageBlobs = blobs
-        .filter((b) => b.pathname.startsWith("uploads/"))
+        .filter(
+          (b) =>
+            b.pathname.startsWith("uploads/") &&
+            !b.pathname.includes("img-1792") &&
+            !b.pathname.includes("poster.png")
+        )
         .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
 
       if (imageBlobs.length > 0) {
         const latestImageUrl = imageBlobs[0].url;
         const localProfile = await getLocalFallbackProfile();
-        const autoSyncedProfile = {
+        const autoSyncedProfile = sanitizeProfile({
           ...localProfile,
           posterImage: latestImageUrl,
-        };
+        });
 
         // Persist profile-data.json immediately so all devices synchronize
         try {
@@ -111,7 +196,6 @@ export async function getProfile(): Promise<ProfileData> {
             cacheControlMaxAge: 0,
             contentType: "application/json",
           });
-          console.log("Auto-synced profile-data.json with latest uploaded image:", latestImageUrl);
         } catch (autoErr) {
           console.warn("Auto-sync profile-data.json warning:", autoErr);
         }
@@ -135,21 +219,32 @@ export async function saveProfile(
   let storageType = "local";
   let lastError = "";
 
+  const cleanData = sanitizeProfile(data);
+
   // 1. Save to Vercel KV / Upstash Redis if configured
   if (KV_URL && KV_TOKEN) {
     try {
-      const res = await fetch(`${KV_URL}/set/bilal_profile_data`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${KV_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(JSON.stringify(data)),
-      });
-      if (res.ok) {
-        savedToCloud = true;
-        storageType = "vercel-kv";
-      }
+      const payload = JSON.stringify(JSON.stringify(cleanData));
+      await Promise.allSettled([
+        fetch(`${KV_URL}/set/ferdaous_profile_data`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${KV_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+          body: payload,
+        }),
+        fetch(`${KV_URL}/set/bilal_profile_data`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${KV_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+          body: payload,
+        }),
+      ]);
+      savedToCloud = true;
+      storageType = "vercel-kv";
     } catch (e) {
       console.warn("Failed to save to KV:", e);
     }
@@ -159,7 +254,7 @@ export async function saveProfile(
   if (process.env.BLOB_READ_WRITE_TOKEN) {
     try {
       const { put } = await import("@vercel/blob");
-      const blob = await put("profile-data.json", JSON.stringify(data, null, 2), {
+      const blob = await put("profile-data.json", JSON.stringify(cleanData, null, 2), {
         access: "public",
         addRandomSuffix: false,
         allowOverwrite: true,
@@ -194,7 +289,7 @@ export async function saveProfile(
         const fileInfo = await getRes.json();
         sha = fileInfo.sha;
       }
-      const content = Buffer.from(JSON.stringify(data, null, 2)).toString("base64");
+      const content = Buffer.from(JSON.stringify(cleanData, null, 2)).toString("base64");
       const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
         method: "PUT",
         headers: {
@@ -220,7 +315,7 @@ export async function saveProfile(
   // 4. Try Local File System (works on local machine, throws on Vercel read-only)
   let savedToFile = false;
   try {
-    const jsonString = JSON.stringify(data, null, 2);
+    const jsonString = JSON.stringify(cleanData, null, 2);
 
     const dataDir = path.dirname(DATA_FILE_PATH);
     if (!fs.existsSync(dataDir)) {

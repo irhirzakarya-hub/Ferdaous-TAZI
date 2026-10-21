@@ -1,82 +1,240 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
+  motion,
+  AnimatePresence,
+  useMotionValue,
+  useSpring,
+  useTransform,
+  Variants,
+} from "framer-motion";
+import {
   Phone,
-  MessageCircle,
-  MapPin,
-  UserPlus,
+  Mail,
   Share2,
-  Sparkles,
   CheckCircle2,
-  Truck,
-  ShieldCheck,
-  BadgePercent,
-  ThumbsUp,
-  Clock,
-  Smartphone,
-  BedDouble,
-  Wrench,
-  Maximize2,
-  X,
   Copy,
   Check,
   Lock,
-  ExternalLink,
-  Flame,
   QrCode,
   Download,
+  X,
+  Building2,
+  UserCheck,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { ProfileData } from "@/lib/types";
 import { DEFAULT_PROFILE } from "@/lib/constants";
 import { downloadVCard } from "@/lib/vcard";
 import {
-  InstagramIcon,
-  InstagramGradientIcon,
-  FacebookIcon,
-  FacebookRoundIcon,
-  WhatsAppIcon,
+  LinkedInRoundIcon,
   WhatsAppRoundIcon,
+  WhatsAppIcon,
+  LinkedInIcon,
 } from "@/components/SocialIcons";
-function InstagramVerifiedBadge({ size = 22 }: { size?: number }) {
+
+// Verified Gold Shield Badge
+function VerifiedBadge({ size = 22 }: { size?: number }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      style={{
-        display: "inline-block",
-        verticalAlign: "middle",
-        flexShrink: 0,
-        filter: "drop-shadow(0 0 8px rgba(0, 149, 246, 0.75))",
-      }}
+    <motion.div
+      initial={{ scale: 0 }}
+      animate={{ scale: 1 }}
+      transition={{ type: "spring", stiffness: 350, damping: 15, delay: 0.2 }}
+      style={{ display: "inline-flex" }}
     >
-      <circle cx="12" cy="12" r="10.5" fill="#0095F6" />
-      <path
-        d="M7.5 12L10.5 15L16.5 9"
-        stroke="#FFFFFF"
-        strokeWidth="2.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        style={{
+          display: "inline-block",
+          verticalAlign: "middle",
+          flexShrink: 0,
+          filter: "drop-shadow(0 0 10px rgba(229, 192, 110, 0.75))",
+        }}
+      >
+        <circle cx="12" cy="12" r="10.5" fill="#e5c06e" />
+        <path
+          d="M7.5 12L10.5 15L16.5 9"
+          stroke="#040d0b"
+          strokeWidth="2.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </motion.div>
   );
 }
 
+// Interactive 3D Tilt Card Component
+function TiltCard({
+  children,
+  className = "",
+  style = {},
+}: {
+  children: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const mouseXSpring = useSpring(x, { stiffness: 220, damping: 20 });
+  const mouseYSpring = useSpring(y, { stiffness: 220, damping: 20 });
+
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["9deg", "-9deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-9deg", "9deg"]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const xPct = mouseX / width - 0.5;
+    const yPct = mouseY / height - 0.5;
+    x.set(xPct);
+    y.set(yPct);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        rotateX,
+        rotateY,
+        transformStyle: "preserve-3d",
+        perspective: "1000px",
+        ...style,
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// Background Floating Ambient Particles
+function FloatingParticleBackground() {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        pointerEvents: "none",
+        zIndex: 0,
+        overflow: "hidden",
+      }}
+    >
+      <motion.div
+        animate={{
+          scale: [1, 1.25, 1],
+          opacity: [0.22, 0.42, 0.22],
+          x: [0, 25, 0],
+          y: [0, -30, 0],
+        }}
+        transition={{
+          duration: 9,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        style={{
+          position: "absolute",
+          top: "-80px",
+          right: "-80px",
+          width: "380px",
+          height: "380px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, transparent 70%)",
+          filter: "blur(70px)",
+        }}
+      />
+      <motion.div
+        animate={{
+          scale: [1, 1.3, 1],
+          opacity: [0.18, 0.35, 0.18],
+          x: [0, -25, 0],
+          y: [0, 35, 0],
+        }}
+        transition={{
+          duration: 11,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 1.5,
+        }}
+        style={{
+          position: "absolute",
+          top: "35%",
+          left: "-120px",
+          width: "360px",
+          height: "360px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(229, 192, 110, 0.2) 0%, transparent 70%)",
+          filter: "blur(70px)",
+        }}
+      />
+    </div>
+  );
+}
+
+// Motion Stagger Variants
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.05,
+    },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring" as const,
+      stiffness: 280,
+      damping: 24,
+    },
+  },
+};
+
 export default function HomePage() {
-  const [lang, setLang] = useState<"ar" | "fr">("ar");
   const [profile, setProfile] = useState<ProfileData>(DEFAULT_PROFILE);
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [savedContactDone, setSavedContactDone] = useState(false);
+  const [currentUrl, setCurrentUrl] = useState("");
 
-  // Load profile from API or LocalStorage override
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setCurrentUrl(window.location.href);
+      // Clean obsolete old keys
+      localStorage.removeItem("bilal_profile_override");
+      localStorage.removeItem("bilal_admin_auth");
+      localStorage.removeItem("bilal_github_token");
+    }
+  }, []);
+
+  // Fetch profile from API or LocalStorage fallback
   useEffect(() => {
     async function fetchProfile() {
       try {
@@ -84,50 +242,118 @@ export default function HomePage() {
         if (res.ok) {
           const resJson = await res.json();
           const { _storageCapabilities, ...data } = resJson;
-          setProfile(data);
 
-          // Only use localOverride if server has no cloud storage configured
+          // Sanitize any lingering old Bilal data
+          const sanitized = { ...data };
+          sanitized.businessName = sanitized.businessName || "Ferdaous TAZI";
+          sanitized.title = sanitized.title || "Directrice executive";
+          sanitized.organization = sanitized.organization || "REMESS";
+          sanitized.phone = sanitized.phone || "0661633888";
+          sanitized.phoneDisplay = sanitized.phoneDisplay || sanitized.phone || "06 61 63 38 88";
+          sanitized.whatsapp = sanitized.whatsapp || sanitized.phone || "0661633888";
+          sanitized.email = sanitized.email || "F.tazi@remess.ma";
+
+          sanitized.qrCodeUrl = sanitized.qrCodeUrl ?? "";
+          sanitized.qrCodeImage = sanitized.qrCodeImage ?? "";
+
+          if (
+            !sanitized.posterImage ||
+            sanitized.posterImage.includes("img-1792") ||
+            sanitized.posterImage.includes("poster.png") ||
+            !sanitized.posterImage.includes("ferdaous")
+          ) {
+            sanitized.posterImage = "/uploads/ferdaous_tazi.jpg";
+          }
+
+          setProfile(sanitized);
+
           if (!_storageCapabilities?.isCloudReady) {
-            const localOverride = localStorage.getItem("bilal_profile_override");
+            const localOverride = localStorage.getItem("ferdaous_profile_override");
             if (localOverride) {
               try {
-                setProfile((prev) => ({ ...prev, ...JSON.parse(localOverride) }));
+                const parsed = JSON.parse(localOverride);
+                if (parsed.phone && !parsed.phone.includes("062078")) {
+                  setProfile((prev) => ({ ...prev, ...parsed }));
+                }
               } catch (e) {
                 console.error(e);
               }
             }
           } else {
-            // Cloud storage is active on Vercel: clean obsolete local override
-            localStorage.removeItem("bilal_profile_override");
+            localStorage.removeItem("ferdaous_profile_override");
           }
         }
       } catch (err) {
-        console.warn("Could not fetch profile API, checking localStorage", err);
-        const localOverride = localStorage.getItem("bilal_profile_override");
-        if (localOverride) {
-          try {
-            setProfile(JSON.parse(localOverride));
-          } catch (e) {
-            console.error(e);
-          }
-        }
+        console.warn("Could not fetch profile API", err);
       }
     }
     fetchProfile();
   }, []);
 
-  const isAr = lang === "ar";
+  // Helpers to safely resolve string or LocalizedString
+  const getName = () => {
+    if (!profile.businessName) return "Ferdaous TAZI";
+    if (typeof profile.businessName === "string") return profile.businessName;
+    return profile.businessName.fr || profile.businessName.ar || "Ferdaous TAZI";
+  };
+
+  const getTitle = (): string => {
+    let raw = "";
+    if (typeof profile.title === "string" && profile.title) {
+      raw = profile.title;
+    } else if (typeof profile.subtitle === "string") {
+      raw = profile.subtitle;
+    } else if (profile.subtitle && typeof profile.subtitle === "object") {
+      raw = profile.subtitle.fr || profile.subtitle.ar || "Directrice executive";
+    }
+
+    if (
+      !raw ||
+      raw.toLowerCase().includes("literie") ||
+      raw.toLowerCase().includes("bilal") ||
+      raw.toLowerCase().includes("بيع")
+    ) {
+      return "Directrice executive";
+    }
+    return raw;
+  };
+
+  const getOrg = (): string => {
+    let raw = "";
+    if (typeof profile.organization === "string" && profile.organization) {
+      raw = profile.organization;
+    } else if (typeof profile.slogan === "string") {
+      raw = profile.slogan;
+    } else if (profile.slogan && typeof profile.slogan === "object") {
+      raw = profile.slogan.fr || profile.slogan.ar || "REMESS";
+    }
+
+    if (
+      !raw ||
+      raw.toLowerCase().includes("bilal") ||
+      raw.toLowerCase().includes("مكان واحد")
+    ) {
+      return "REMESS";
+    }
+    return raw;
+  };
+
+  const getDescription = () => {
+    if (!profile.description) return "";
+    if (typeof profile.description === "string") return profile.description;
+    return profile.description.fr || profile.description.ar || "";
+  };
 
   const handleSaveContact = () => {
     confetti({
-      particleCount: 120,
-      spread: 80,
+      particleCount: 140,
+      spread: 85,
       origin: { y: 0.6 },
-      colors: ["#f59e0b", "#3b82f6", "#10b981", "#ffffff"],
+      colors: ["#e5c06e", "#10b981", "#f7df9e", "#ffffff", "#047857"],
     });
     downloadVCard(profile);
     setSavedContactDone(true);
-    setTimeout(() => setSavedContactDone(false), 4000);
+    setTimeout(() => setSavedContactDone(false), 4500);
   };
 
   const handleCopyLink = () => {
@@ -142,8 +368,8 @@ export default function HomePage() {
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
         await navigator.share({
-          title: `${profile.businessName[lang]} - ${profile.city[lang]}`,
-          text: `${profile.subtitle[lang]} - ${profile.slogan[lang]}`,
+          title: `${getName()} - ${getTitle()}`,
+          text: `${getName()} | ${getOrg()}`,
           url: window.location.href,
         });
       } catch {
@@ -154,119 +380,57 @@ export default function HomePage() {
     }
   };
 
-  const getWhatsAppUrl = (productName?: string) => {
-    const rawPhone = profile.whatsapp.replace(/[^0-9]/g, "");
-    let text = isAr
-      ? `مرحباً أخي بلال، أتواصل معك من خلال البطاقة الذكية لـ Bilal Electronique.`
-      : `Bonjour Bilal, je vous contacte depuis votre carte digitale Bilal Electronique.`;
+  const phoneCallNumber = profile.phone || "0661633888";
+  const whatsappNumber = profile.whatsapp || profile.phone || "0661633888";
 
-    if (productName) {
-      text += isAr
-        ? ` أريد الاستفسار عن: *${productName}*.`
-        : ` Je souhaite avoir des informations sur : *${productName}*.`;
-    }
-
-    return `https://wa.me/${rawPhone}?text=${encodeURIComponent(text)}`;
+  const getWhatsAppUrl = () => {
+    const rawWa = whatsappNumber.replace(/[^0-9]/g, "");
+    const intlWa = rawWa.startsWith("0") ? `212${rawWa.slice(1)}` : rawWa;
+    const text = `Bonjour Mme Ferdaous TAZI, je vous contacte depuis votre carte digitale professionnelle REMESS.`;
+    return `https://wa.me/${intlWa}?text=${encodeURIComponent(text)}`;
   };
 
-  const instagramUrl =
-    profile.instagram?.trim() ||
-    profile.socialLinks?.find((s) => s.platform === "instagram" && s.url?.trim())?.url?.trim() ||
-    "";
+  const linkedinUrl =
+    profile.linkedin?.trim() || "https://www.linkedin.com/in/ferdaous-tazi-961758361/";
 
-  const facebookUrl =
-    profile.facebook?.trim() ||
-    profile.socialLinks?.find((s) => s.platform === "facebook" && s.url?.trim())?.url?.trim() ||
-    "";
+  const emailAddress = profile.email || "F.tazi@remess.ma";
 
-  const hasInstagram = Boolean(instagramUrl);
-  const hasFacebook = Boolean(facebookUrl);
+  // Dynamic / Custom QR code
+  const qrTargetLink =
+    (profile.qrCodeUrl && profile.qrCodeUrl.trim()) ||
+    currentUrl ||
+    (typeof window !== "undefined" ? window.location.origin : "https://www.linkedin.com/in/ferdaous-tazi-961758361/");
 
-  const getInstagramHandle = (url: string) => {
-    try {
-      const match = url.match(/instagram\.com\/([a-zA-Z0-9._]+)/);
-      return match ? `@${match[1]}` : "@bilal_electronique_212_ma_99";
-    } catch {
-      return "@bilal_electronique_212_ma_99";
-    }
-  };
+  const dynamicQrCode = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&color=040d0b&bgcolor=e5c06e&data=${encodeURIComponent(
+    qrTargetLink
+  )}`;
 
-
-
-  const getBadgeIcon = (iconName: string) => {
-    switch (iconName) {
-      case "BadgePercent":
-        return <BadgePercent style={{ width: 20, height: 20, color: "#fbbf24" }} />;
-      case "ShieldCheck":
-        return <ShieldCheck style={{ width: 20, height: 20, color: "#34d399" }} />;
-      case "ThumbsUp":
-        return <ThumbsUp style={{ width: 20, height: 20, color: "#60a5fa" }} />;
-      case "Clock":
-        return <Clock style={{ width: 20, height: 20, color: "#c084fc" }} />;
-      default:
-        return <Sparkles style={{ width: 20, height: 20, color: "#fbbf24" }} />;
-    }
-  };
-
-  const getBadgeBg = (iconName: string) => {
-    switch (iconName) {
-      case "BadgePercent":
-        return "linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(245, 158, 11, 0.05) 100%)";
-      case "ShieldCheck":
-        return "linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.05) 100%)";
-      case "ThumbsUp":
-        return "linear-gradient(135deg, rgba(37, 99, 235, 0.25) 0%, rgba(37, 99, 235, 0.05) 100%)";
-      case "Clock":
-        return "linear-gradient(135deg, rgba(168, 85, 247, 0.25) 0%, rgba(168, 85, 247, 0.05) 100%)";
-      default:
-        return "rgba(245, 158, 11, 0.15)";
-    }
-  };
+  const qrDisplayUrl =
+    profile.qrCodeImage && profile.qrCodeImage.trim()
+      ? profile.qrCodeImage
+      : dynamicQrCode;
 
   return (
-    <div dir={isAr ? "rtl" : "ltr"} className="nfc-page-wrapper">
-      {/* Ambient background glows */}
-      <div
-        className="ambient-glow"
-        style={{
-          position: "fixed",
-          top: "-80px",
-          right: "-80px",
-          width: "300px",
-          height: "300px",
-          borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(37, 99, 235, 0.25) 0%, transparent 70%)",
-          filter: "blur(50px)",
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-      />
-      <div
-        className="ambient-glow"
-        style={{
-          position: "fixed",
-          bottom: "15%",
-          left: "-80px",
-          width: "280px",
-          height: "280px",
-          borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(245, 158, 11, 0.18) 0%, transparent 70%)",
-          filter: "blur(50px)",
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-      />
+    <div
+      dir="ltr"
+      className="nfc-page-wrapper selection:bg-[#e5c06e] selection:text-[#040d0b]"
+    >
+      {/* Background Floating Ambient Particles */}
+      <FloatingParticleBackground />
 
       {/* Top Header */}
-      <header
+      <motion.header
+        initial={{ y: -40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
         style={{
           position: "sticky",
           top: 0,
           zIndex: 40,
-          backdropFilter: "blur(18px)",
-          WebkitBackdropFilter: "blur(18px)",
-          backgroundColor: "rgba(5, 8, 20, 0.88)",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+          backdropFilter: "blur(22px)",
+          WebkitBackdropFilter: "blur(22px)",
+          backgroundColor: "rgba(4, 13, 11, 0.88)",
+          borderBottom: "1px solid rgba(229, 192, 110, 0.18)",
           padding: "10px 0",
         }}
       >
@@ -278,1251 +442,918 @@ export default function HomePage() {
             justifyContent: "space-between",
           }}
         >
-          {/* Active NFC Badge */}
+          {/* Active Verified Executive Badge */}
+          <motion.div whileHover={{ scale: 1.04 }} className="status-badge-active">
+            <span className="radar-dot" style={{ width: "7px", height: "7px" }} />
+            <span>REMESS</span>
+          </motion.div>
+
+          {/* Right Header Controls: QR + Share + Admin */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            {/* QR Code button */}
+            <motion.button
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              whileTap={{ scale: 0.92 }}
+              onClick={() => setQrModalOpen(true)}
+              aria-label="QR Code"
+              style={{
+                width: "35px",
+                height: "35px",
+                borderRadius: "50%",
+                background: "rgba(11, 33, 28, 0.88)",
+                border: "1px solid rgba(229, 192, 110, 0.25)",
+                color: "#e5c06e",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
+            >
+              <QrCode style={{ width: 16, height: 16 }} />
+            </motion.button>
+
+            {/* Share button */}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.92 }}
+              onClick={handleShareNative}
+              aria-label="Partager"
+              style={{
+                width: "35px",
+                height: "35px",
+                borderRadius: "50%",
+                background: "rgba(11, 33, 28, 0.88)",
+                border: "1px solid rgba(229, 192, 110, 0.25)",
+                color: "#f8fafc",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
+            >
+              <Share2 style={{ width: 16, height: 16 }} />
+            </motion.button>
+
+            {/* Admin Key Link */}
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.92 }}>
+              <Link
+                href="/admin"
+                aria-label="Admin Page"
+                style={{
+                  width: "35px",
+                  height: "35px",
+                  borderRadius: "50%",
+                  background: "rgba(11, 33, 28, 0.88)",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  color: "#64748b",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  textDecoration: "none",
+                }}
+              >
+                <Lock style={{ width: 14, height: 14 }} />
+              </Link>
+            </motion.div>
+          </div>
+        </div>
+      </motion.header>
+
+      {/* Main Container with Staggered Motion */}
+      <motion.main
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="nfc-mobile-container"
+        style={{ paddingTop: "20px", position: "relative", zIndex: 10 }}
+      >
+        {/* ==========================================================================
+            HERO EXECUTIVE PROFILE CARD (WITH 3D TILT & ROTATING CONIC AURA)
+            ========================================================================== */}
+        <motion.section variants={itemVariants} style={{ marginBottom: "20px" }}>
+          <TiltCard className="animated-conic-border">
+            <div className="animated-conic-inner" style={{ padding: "28px 22px 24px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  textAlign: "center",
+                }}
+              >
+                {/* Rotating Halo Portrait Avatar */}
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  className="avatar-halo-ring"
+                  style={{ marginBottom: "18px", cursor: "pointer" }}
+                  onClick={() => setImageModalOpen(true)}
+                >
+                  <div
+                    style={{
+                      position: "relative",
+                      width: "128px",
+                      height: "128px",
+                      borderRadius: "50%",
+                      overflow: "hidden",
+                      backgroundColor: "#071714",
+                      zIndex: 1,
+                    }}
+                  >
+                    <Image
+                      src={profile.posterImage || "/uploads/ferdaous_tazi.jpg"}
+                      alt={getName()}
+                      fill
+                      sizes="140px"
+                      priority
+                      style={{ objectFit: "cover" }}
+                    />
+                  </div>
+
+                  {/* Verified Badge on avatar */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: "4px",
+                      right: "4px",
+                      background: "#040d0b",
+                      borderRadius: "50%",
+                      padding: "3px",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.7)",
+                      zIndex: 3,
+                    }}
+                  >
+                    <VerifiedBadge size={25} />
+                  </div>
+                </motion.div>
+
+                {/* Name */}
+                <motion.h1
+                  variants={itemVariants}
+                  style={{
+                    fontSize: "28px",
+                    fontWeight: 900,
+                    letterSpacing: "-0.5px",
+                    color: "#ffffff",
+                    lineHeight: 1.2,
+                    marginBottom: "8px",
+                  }}
+                >
+                  {getName()}
+                </motion.h1>
+
+                {/* Directrice executive field directly under name */}
+                <motion.div
+                  variants={itemVariants}
+                  style={{
+                    fontSize: "17px",
+                    fontWeight: 700,
+                    color: "#f3d179",
+                    marginBottom: "8px",
+                    lineHeight: 1.4,
+                    letterSpacing: "0.2px",
+                  }}
+                >
+                  {getTitle()}
+                </motion.div>
+
+                {/* REMESS field directly under title */}
+                <motion.div
+                  variants={itemVariants}
+                  whileHover={{ scale: 1.03 }}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "7px",
+                    padding: "6px 18px",
+                    borderRadius: "30px",
+                    background: "rgba(16, 185, 129, 0.16)",
+                    border: "1px solid rgba(16, 185, 129, 0.4)",
+                    color: "#34d399",
+                    fontSize: "13px",
+                    fontWeight: 800,
+                    letterSpacing: "0.6px",
+                    marginBottom: "20px",
+                    boxShadow: "0 0 16px rgba(16, 185, 129, 0.15)",
+                  }}
+                >
+                  <Building2 style={{ width: 14, height: 14, flexShrink: 0 }} />
+                  <span>{getOrg()}</span>
+                </motion.div>
+
+                {/* Primary Action Button: Save Contact (vCard) */}
+                <motion.button
+                  variants={itemVariants}
+                  whileHover={{ scale: 1.025, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleSaveContact}
+                  className="btn-gold-hero"
+                  style={{ marginBottom: "10px" }}
+                >
+                  {savedContactDone ? (
+                    <>
+                      <CheckCircle2 style={{ width: 20, height: 20, color: "#040d0b" }} />
+                      <span>✓ Contact Enregistré !</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download style={{ width: 20, height: 20 }} />
+                      <span>Enregistrer le Contact (vCard)</span>
+                    </>
+                  )}
+                </motion.button>
+
+                <p style={{ fontSize: "11px", color: "#64748b" }}>
+                  Téléchargement instantané dans votre carnet d'adresses
+                </p>
+              </div>
+            </div>
+          </TiltCard>
+        </motion.section>
+
+        {/* ==========================================================================
+            EXECUTIVE DIRECT ACTIONS GRID (0661633888, WhatsApp, Email, LinkedIn)
+            ========================================================================== */}
+        <motion.section variants={itemVariants} style={{ marginBottom: "22px" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(2, 1fr)",
+              gap: "10px",
+            }}
+          >
+            {/* Phone */}
+            <motion.a
+              whileHover={{ scale: 1.03, y: -2 }}
+              whileTap={{ scale: 0.97 }}
+              href={`tel:${phoneCallNumber}`}
+              className="btn-glass-action"
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                gap: "10px",
+                padding: "14px 16px",
+              }}
+            >
+              <div
+                style={{
+                  width: "38px",
+                  height: "38px",
+                  borderRadius: "12px",
+                  background: "rgba(16, 185, 129, 0.16)",
+                  border: "1px solid rgba(16, 185, 129, 0.35)",
+                  color: "#34d399",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <Phone style={{ width: 18, height: 18 }} />
+              </div>
+              <div style={{ textAlign: "left", overflow: "hidden" }}>
+                <div style={{ fontSize: "11px", color: "#94a3b8" }}>
+                  Téléphone
+                </div>
+                <div style={{ fontSize: "13px", fontWeight: 700, color: "#ffffff", whiteSpace: "nowrap" }}>
+                  {phoneCallNumber}
+                </div>
+              </div>
+            </motion.a>
+
+            {/* WhatsApp */}
+            <motion.a
+              whileHover={{ scale: 1.03, y: -2 }}
+              whileTap={{ scale: 0.97 }}
+              href={getWhatsAppUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-glass-action"
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                gap: "10px",
+                padding: "14px 16px",
+              }}
+            >
+              <div
+                style={{
+                  width: "38px",
+                  height: "38px",
+                  borderRadius: "12px",
+                  background: "rgba(37, 211, 102, 0.16)",
+                  border: "1px solid rgba(37, 211, 102, 0.35)",
+                  color: "#25D366",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <WhatsAppIcon size={20} />
+              </div>
+              <div style={{ textAlign: "left", overflow: "hidden" }}>
+                <div style={{ fontSize: "11px", color: "#94a3b8" }}>WhatsApp</div>
+                <div style={{ fontSize: "13px", fontWeight: 700, color: "#25D366", whiteSpace: "nowrap" }}>
+                  {whatsappNumber}
+                </div>
+              </div>
+            </motion.a>
+
+            {/* Email: F.tazi@remess.ma */}
+            <motion.a
+              whileHover={{ scale: 1.03, y: -2 }}
+              whileTap={{ scale: 0.97 }}
+              href={`mailto:${emailAddress}?subject=${encodeURIComponent("Prise de contact - REMESS / Ferdaous TAZI")}`}
+              className="btn-glass-action"
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                gap: "10px",
+                padding: "14px 16px",
+              }}
+            >
+              <div
+                style={{
+                  width: "38px",
+                  height: "38px",
+                  borderRadius: "12px",
+                  background: "rgba(229, 192, 110, 0.16)",
+                  border: "1px solid rgba(229, 192, 110, 0.35)",
+                  color: "#e5c06e",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <Mail style={{ width: 18, height: 18 }} />
+              </div>
+              <div style={{ textAlign: "left", overflow: "hidden" }}>
+                <div style={{ fontSize: "11px", color: "#94a3b8" }}>Email</div>
+                <div
+                  style={{
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    color: "#ffffff",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {emailAddress}
+                </div>
+              </div>
+            </motion.a>
+
+            {/* LinkedIn: Ferdaous TAZI */}
+            <motion.a
+              whileHover={{ scale: 1.03, y: -2 }}
+              whileTap={{ scale: 0.97 }}
+              href={linkedinUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-glass-action"
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                gap: "10px",
+                padding: "14px 16px",
+              }}
+            >
+              <div
+                style={{
+                  width: "38px",
+                  height: "38px",
+                  borderRadius: "12px",
+                  background: "rgba(10, 102, 194, 0.2)",
+                  border: "1px solid rgba(10, 102, 194, 0.4)",
+                  color: "#38bdf8",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <LinkedInIcon size={19} />
+              </div>
+              <div style={{ textAlign: "left", overflow: "hidden" }}>
+                <div style={{ fontSize: "11px", color: "#94a3b8" }}>LinkedIn</div>
+                <div style={{ fontSize: "13px", fontWeight: 700, color: "#38bdf8", whiteSpace: "nowrap" }}>
+                  Ferdaous TAZI
+                </div>
+              </div>
+            </motion.a>
+          </div>
+        </motion.section>
+
+        {/* ==========================================================================
+            EXECUTIVE BIOGRAPHY (TEXT EXACT FOURNI)
+            ========================================================================== */}
+        <motion.section
+          variants={itemVariants}
+          className="luxury-card card-gold-accent-line"
+          style={{ padding: "26px 20px", marginBottom: "26px" }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              marginBottom: "16px",
+            }}
+          >
+            <div
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "12px",
+                background: "rgba(16, 185, 129, 0.16)",
+                border: "1px solid rgba(16, 185, 129, 0.3)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#10b981",
+              }}
+            >
+              <UserCheck style={{ width: 20, height: 20 }} />
+            </div>
+            <div>
+              <h2 style={{ fontSize: "17px", fontWeight: 800, color: "#ffffff" }}>
+                Profil & Mission
+              </h2>
+              <p style={{ fontSize: "11px", color: "#e5c06e" }}>Ferdaous TAZI · REMESS</p>
+            </div>
+          </div>
+
+          {/* Exact bio text */}
+          <div
+            style={{
+              fontSize: "13.5px",
+              lineHeight: 1.8,
+              color: "#cbd5e1",
+              whiteSpace: "pre-line",
+            }}
+          >
+            {getDescription()}
+          </div>
+        </motion.section>
+
+        {/* ==========================================================================
+            EXECUTIVE FOOTER
+            ========================================================================== */}
+        <footer style={{ textAlign: "center", padding: "10px 0 20px" }}>
           <div
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: "7px",
-              padding: "5px 12px",
-              borderRadius: "30px",
-              background: "rgba(16, 185, 129, 0.12)",
-              border: "1px solid rgba(16, 185, 129, 0.25)",
-              color: "#34d399",
+              gap: "6px",
+              padding: "4px 12px",
+              borderRadius: "20px",
+              background: "rgba(255, 255, 255, 0.04)",
+              color: "#64748b",
               fontSize: "11px",
-              fontWeight: 700,
+              marginBottom: "8px",
             }}
           >
-            <span
-              className="radar-dot"
-              style={{
-                width: "7px",
-                height: "7px",
-                borderRadius: "50%",
-                backgroundColor: "#10b981",
-                display: "inline-block",
-              }}
-            />
-            <span>{isAr ? "بطاقة NFC الذكية" : "NFC Connecté"}</span>
+            <span>Ferdaous TAZI</span>
+            <span>•</span>
+            <span>REMESS</span>
           </div>
+          <p style={{ fontSize: "11px", color: "#475569" }}>
+            © {new Date().getFullYear()} {getName()} · {getOrg()}
+          </p>
+        </footer>
+      </motion.main>
 
-          {/* Language Switcher & Share */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <button
-              id="header-share-btn"
-              onClick={handleShareNative}
-              style={{
-                width: "34px",
-                height: "34px",
-                borderRadius: "50%",
-                background: "rgba(255, 255, 255, 0.08)",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-                color: "#e2e8f0",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-              }}
-              title={isAr ? "مشاركة البطاقة" : "Partager"}
-            >
-              <Share2 style={{ width: 15, height: 15 }} />
-            </button>
-
-            {/* Language Pill Switch */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                background: "rgba(10, 15, 35, 0.9)",
-                borderRadius: "30px",
-                padding: "3px",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-              }}
-            >
-              <button
-                id="lang-ar-btn"
-                onClick={() => setLang("ar")}
-                style={{
-                  padding: "4px 10px",
-                  borderRadius: "20px",
-                  fontSize: "11px",
-                  fontWeight: 800,
-                  border: "none",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                  background: isAr
-                    ? "linear-gradient(135deg, #2563eb, #1d4ed8)"
-                    : "transparent",
-                  color: isAr ? "#ffffff" : "#94a3b8",
-                  boxShadow: isAr ? "0 2px 8px rgba(37,99,235,0.4)" : "none",
-                }}
-              >
-                عربي
-              </button>
-              <button
-                id="lang-fr-btn"
-                onClick={() => setLang("fr")}
-                style={{
-                  padding: "4px 10px",
-                  borderRadius: "20px",
-                  fontSize: "11px",
-                  fontWeight: 800,
-                  border: "none",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                  background: !isAr
-                    ? "linear-gradient(135deg, #2563eb, #1d4ed8)"
-                    : "transparent",
-                  color: !isAr ? "#ffffff" : "#94a3b8",
-                  boxShadow: !isAr ? "0 2px 8px rgba(37,99,235,0.4)" : "none",
-                }}
-              >
-                FR
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Container */}
-      <main className="nfc-mobile-container" style={{ paddingTop: "14px" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          
-          {/* 🌟 1. HERO PROFILE: THE POSTER IMAGE AT THE VERY TOP (كما طلب الزبون) */}
-          {profile.posterImage && (
-            <div style={{ position: "relative" }}>
-              {/* الشارات موضوعة فوق الإطار مباشرة كما طلب الزبون */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "0 10px",
-                  marginBottom: "-13px",
-                  position: "relative",
-                  zIndex: 20,
-                }}
-              >
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "6px 14px",
-                    borderRadius: "30px",
-                    background: "rgba(6, 12, 30, 0.95)",
-                    backdropFilter: "blur(14px)",
-                    WebkitBackdropFilter: "blur(14px)",
-                    border: "1.5px solid rgba(0, 149, 246, 0.55)",
-                    boxShadow: "0 4px 14px rgba(0, 0, 0, 0.6), 0 0 14px rgba(0, 149, 246, 0.3)",
-                  }}
-                >
-                  <InstagramVerifiedBadge size={20} />
-                  <span style={{ fontSize: "12px", fontWeight: 800, color: "#ffffff", letterSpacing: "0.2px" }}>
-                    {isAr ? "موثوق ومعتمد" : "Vérifié & Certifié"}
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: "5px 12px",
-                    borderRadius: "20px",
-                    background: "rgba(6, 12, 30, 0.95)",
-                    backdropFilter: "blur(14px)",
-                    WebkitBackdropFilter: "blur(14px)",
-                    border: "1.5px solid rgba(16, 185, 129, 0.45)",
-                    boxShadow: "0 4px 14px rgba(0, 0, 0, 0.6)",
-                    color: "#34d399",
-                    fontSize: "11px",
-                    fontWeight: 700,
-                  }}
-                >
-                  <span
-                    style={{
-                      width: "6px",
-                      height: "6px",
-                      borderRadius: "50%",
-                      backgroundColor: "#10b981",
-                      display: "inline-block",
-                      boxShadow: "0 0 6px #10b981",
-                    }}
-                  />
-                  <span>{isAr ? "متوفر حالياً" : "Disponible"}</span>
-                </div>
-              </div>
-
-              <div
-                className="poster-lux-frame"
-                onClick={() => setImageModalOpen(true)}
-                style={{ cursor: "pointer", paddingTop: "18px" }}
-              >
-
-                {/* Contained image inside mobile frame */}
-                <div
-                  className="poster-img-container"
-                  style={{
-                    position: "relative",
-                    width: "100%",
-                    aspectRatio: "1 / 1.05",
-                    maxHeight: "420px",
-                    borderRadius: "20px",
-                    overflow: "hidden",
-                    backgroundColor: "#030712",
-                  }}
-                >
-                  <Image
-                    src={profile.posterImage}
-                    alt={profile.businessName[lang]}
-                    fill
-                    sizes="(max-width: 480px) 100vw, 440px"
-                    style={{
-                      objectFit: "contain",
-                      objectPosition: "center",
-                    }}
-                    priority
-                  />
-                </div>
-
-                {/* Floating Bottom Info Bar */}
-                <div className="poster-floating-badge-bottom">
-                  <div className="zoom-pill-btn">
-                    <Maximize2 style={{ width: 12, height: 12 }} />
-                    <span>{isAr ? "اضغط للمعاينة الكاملة" : "Plein Écran"}</span>
-                  </div>
-                  <span
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: 800,
-                      fontFamily: "monospace",
-                      color: "#fbbf24",
-                      background: "rgba(245, 158, 11, 0.15)",
-                      padding: "4px 8px",
-                      borderRadius: "8px",
-                      border: "1px solid rgba(245, 158, 11, 0.3)",
-                    }}
-                  >
-                    {profile.phoneDisplay}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 2. Identity Information Card */}
-          <div className="luxury-card" style={{ padding: "18px 16px", textAlign: "center" }}>
-            {/* Business Title */}
-            <h1
-              style={{
-                fontSize: "24px",
-                fontWeight: 900,
-                color: "#ffffff",
-                letterSpacing: "0.2px",
-                marginBottom: "4px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-              }}
-            >
-              <span>{profile.businessName[lang]}</span>
-              <InstagramVerifiedBadge size={22} />
-            </h1>
-
-            {/* Subtitle */}
-            <p
-              style={{
-                fontSize: "13.5px",
-                fontWeight: 700,
-                color: "#fbbf24",
-                marginBottom: "8px",
-              }}
-            >
-              {profile.subtitle[lang]}
-            </p>
-
-            {/* Location Tag */}
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "5px",
-                padding: "4px 12px",
-                borderRadius: "30px",
-                backgroundColor: "rgba(15, 23, 42, 0.8)",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-                color: "#cbd5e1",
-                fontSize: "11px",
-                fontWeight: 600,
-                marginBottom: "8px",
-              }}
-            >
-              <MapPin style={{ width: 13, height: 13, color: "#f43f5e" }} />
-              <span>{profile.city[lang]}</span>
-            </div>
-
-            {/* Slogan */}
-            <p
-              style={{
-                fontSize: "12px",
-                color: "#94a3b8",
-                lineHeight: "1.5",
-                maxWidth: "340px",
-                margin: "0 auto",
-              }}
-            >
-              {profile.slogan[lang]}
-            </p>
-          </div>
-
-          {/* 3. Primary NFC Action Buttons */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            {/* Golden 1-Tap Save Contact (vCard) */}
-            <button
-              id="nfc-save-contact-btn"
-              onClick={handleSaveContact}
-              className="btn-nfc-vcard shimmer-effect"
-            >
-              <UserPlus className="anim-icon-user" style={{ width: 19, height: 19, color: "#0c1222" }} />
-              <span>
-                {savedContactDone
-                  ? isAr
-                    ? "✓ تم حفظ جهة الاتصال في الهاتف!"
-                    : "✓ Contact Enregistré !"
-                  : isAr
-                  ? "حفظ جهة الاتصال في الهاتف (vCard)"
-                  : "Enregistrer le Contact (vCard)"}
-              </span>
-            </button>
-
-            {/* Direct WhatsApp and Direct Call */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "10px",
-              }}
-            >
-              <a
-                id="nfc-whatsapp-btn"
-                href={getWhatsAppUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-nfc-whatsapp"
-              >
-                <WhatsAppIcon className="anim-icon-whatsapp" size={19} />
-                <span>{isAr ? "واتساب مباشر" : "WhatsApp"}</span>
-              </a>
-
-              <a
-                id="nfc-call-btn"
-                href={`tel:${profile.phone}`}
-                className="btn-nfc-call"
-              >
-                <Phone className="anim-icon-phone" style={{ width: 18, height: 18 }} />
-                <span>{isAr ? "اتصال فوري" : "Appeler"}</span>
-              </a>
-            </div>
-
-            {/* Social Media Channels (Instagram & Conditional Facebook) */}
-            {(hasInstagram || hasFacebook) && (
-              <div style={{ marginTop: "2px" }}>
-                {hasInstagram && hasFacebook ? (
-                  /* Both Instagram and Facebook available: 2-column luxury grid */
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
-                      gap: "10px",
-                    }}
-                  >
-                    <a
-                      id="nfc-instagram-btn"
-                      href={instagramUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-nfc-instagram"
-                    >
-                      <InstagramGradientIcon size={20} />
-                      <span>{isAr ? "إنستغرام" : "Instagram"}</span>
-                    </a>
-
-                    <a
-                      id="nfc-facebook-btn"
-                      href={facebookUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-nfc-facebook"
-                    >
-                      <FacebookRoundIcon size={20} />
-                      <span>{isAr ? "فيسبوك" : "Facebook"}</span>
-                    </a>
-                  </div>
-                ) : hasInstagram ? (
-                  /* Only Instagram available (Facebook hidden from page) */
-                  <a
-                    id="nfc-instagram-banner"
-                    href={instagramUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="instagram-luxury-banner"
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0, flex: 1 }}>
-                      <InstagramGradientIcon size={28} style={{ flexShrink: 0 }} />
-                      <div style={{ minWidth: 0, overflow: "hidden", textAlign: isAr ? "right" : "left" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                          <span style={{ fontSize: "13px", fontWeight: 800, color: "#ffffff", whiteSpace: "nowrap" }}>
-                            {isAr ? "تابعنا على إنستغرام" : "Instagram"}
-                          </span>
-                          <InstagramVerifiedBadge size={15} />
-                        </div>
-                        <p
-                          style={{
-                            fontSize: "10.5px",
-                            color: "#fbcfe8",
-                            marginTop: "1px",
-                            fontFamily: "monospace",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                            direction: "ltr",
-                            textAlign: isAr ? "right" : "left",
-                          }}
-                        >
-                          {getInstagramHandle(instagramUrl)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        flexShrink: 0,
-                        padding: "5px 10px",
-                        borderRadius: "10px",
-                        background: "linear-gradient(135deg, #e1306c 0%, #c13584 100%)",
-                        color: "#ffffff",
-                        fontSize: "11px",
-                        fontWeight: 800,
-                        whiteSpace: "nowrap",
-                        boxShadow: "0 3px 10px rgba(225, 48, 108, 0.35)",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px",
-                      }}
-                    >
-                      <span>{isAr ? "متابعة" : "Suivre"}</span>
-                      <ExternalLink style={{ width: 11, height: 11 }} />
-                    </div>
-                  </a>
-                ) : (
-                  /* Only Facebook available (Instagram hidden) */
-                  <a
-                    id="nfc-facebook-banner"
-                    href={facebookUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-nfc-facebook"
-                    style={{ padding: "14px 18px" }}
-                  >
-                    <FacebookRoundIcon size={22} />
-                    <span>{isAr ? "صفحتنا الرسمية على فيسبوك (Facebook)" : "Notre Page Facebook"}</span>
-                    <ExternalLink style={{ width: 14, height: 14, opacity: 0.8 }} />
-                  </a>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* 4. Express Delivery Alert Banner */}
-          <div className="delivery-lux-bar">
-            <div className="delivery-truck-circle">
-              <Truck className="truck-bounce" style={{ width: 22, height: 22 }} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  fontSize: "11px",
-                  fontWeight: 800,
-                  color: "#fbbf24",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                <span>{isAr ? "خدمة التوصيل السريع" : "Service de Livraison"}</span>
-                <span
-                  style={{
-                    width: "5px",
-                    height: "5px",
-                    borderRadius: "50%",
-                    backgroundColor: "#10b981",
-                  }}
-                />
-              </div>
-              <p
-                style={{
-                  fontSize: "13px",
-                  fontWeight: 700,
-                  color: "#ffffff",
-                  marginTop: "2px",
-                  lineHeight: "1.3",
-                }}
-              >
-                {profile.deliveryText[lang]}
-              </p>
-            </div>
-          </div>
-
-          {/* 5. 2x2 Trust & Guarantee Cards */}
-          <div>
-            <h2
-              style={{
-                fontSize: "13px",
-                fontWeight: 800,
-                color: "#e2e8f0",
-                marginBottom: "8px",
-                padding: "0 4px",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-              }}
-            >
-              <ShieldCheck style={{ width: 15, height: 15, color: "#34d399" }} />
-              <span>{isAr ? "ضمانات ومميزات التعامل معنا" : "Nos Engagements"}</span>
-            </h2>
-
-            <div className="trust-cards-grid">
-              {profile.badges.map((b) => (
-                <div key={b.id} className="trust-card-item">
-                  <div
-                    className="trust-icon-box"
-                    style={{ background: getBadgeBg(b.icon) }}
-                  >
-                    {getBadgeIcon(b.icon)}
-                  </div>
-                  <div>
-                    <h3
-                      style={{
-                        fontSize: "13px",
-                        fontWeight: 800,
-                        color: "#ffffff",
-                        marginBottom: "3px",
-                      }}
-                    >
-                      {b[lang]}
-                    </h3>
-                    <p
-                      style={{
-                        fontSize: "10.5px",
-                        color: "#94a3b8",
-                        lineHeight: "1.35",
-                      }}
-                    >
-                      {isAr ? b.descAr : b.descFr}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-
-
-          {/* 7. Location & Map Quick Card */}
-          <div
-            className="luxury-card"
+      {/* ==========================================================================
+          FLOATING BOTTOM BAR FOR MOBILE
+          ========================================================================== */}
+      <motion.div
+        initial={{ y: 80, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 280, damping: 25, delay: 0.3 }}
+        className="floating-bottom-bar"
+      >
+        <div
+          className="nfc-mobile-container"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr auto",
+            gap: "8px",
+            alignItems: "center",
+          }}
+        >
+          {/* Call button */}
+          <motion.a
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.95 }}
+            href={`tel:${phoneCallNumber}`}
             style={{
-              padding: "14px",
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between",
-              gap: "10px",
+              justifyContent: "center",
+              gap: "6px",
+              padding: "11px 8px",
+              borderRadius: "14px",
+              background: "rgba(16, 185, 129, 0.18)",
+              border: "1px solid rgba(16, 185, 129, 0.35)",
+              color: "#34d399",
+              fontSize: "12px",
+              fontWeight: 700,
+              textDecoration: "none",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <div
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "14px",
-                  background: "rgba(244, 63, 94, 0.15)",
-                  border: "1px solid rgba(244, 63, 94, 0.25)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#f43f5e",
-                  flexShrink: 0,
-                }}
-              >
-                <MapPin style={{ width: 20, height: 20 }} />
-              </div>
-              <div>
-                <h4 style={{ fontSize: "13px", fontWeight: 800, color: "#f8fafc" }}>
-                  {isAr ? "موقعنا في أزيلال" : "Notre Localisation"}
-                </h4>
-                <p style={{ fontSize: "11px", color: "#94a3b8" }}>
-                  {profile.city[lang]}
-                </p>
-              </div>
-            </div>
+            <Phone style={{ width: 14, height: 14 }} />
+            <span>{phoneCallNumber}</span>
+          </motion.a>
 
-            <a
-              id="google-maps-link"
-              href={profile.mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "5px",
-                padding: "8px 12px",
-                borderRadius: "12px",
-                background: "rgba(255, 255, 255, 0.08)",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-                color: "#f1f5f9",
-                fontSize: "11px",
-                fontWeight: 700,
-                textDecoration: "none",
-              }}
-            >
-              <span>{isAr ? "فتح الخريطة" : "Voir Carte"}</span>
-              <ExternalLink style={{ width: 12, height: 12 }} />
-            </a>
-          </div>
-
-          {/* 🌟 8. Luxury QR Code Card (رمز الاستجابة السريع لمشاركة وحفظ البطاقة) */}
-          {(profile.qrCodeImage || "/uploads/qr.png") && (
-            <div
-              className="luxury-card"
-              style={{
-                padding: "20px 16px",
-                textAlign: "center",
-                background: "linear-gradient(145deg, rgba(16, 24, 52, 0.85) 0%, rgba(10, 16, 38, 0.95) 100%)",
-                border: "1.5px solid rgba(245, 158, 11, 0.35)",
-                boxShadow: "0 15px 35px -10px rgba(0, 0, 0, 0.8), 0 0 25px -5px rgba(245, 158, 11, 0.15)",
-                position: "relative",
-                overflow: "hidden",
-              }}
-            >
-              {/* Top ambient pill */}
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "4px 12px",
-                  borderRadius: "20px",
-                  background: "rgba(245, 158, 11, 0.12)",
-                  border: "1px solid rgba(245, 158, 11, 0.3)",
-                  color: "#fbbf24",
-                  fontSize: "11px",
-                  fontWeight: 800,
-                  marginBottom: "10px",
-                  letterSpacing: "0.4px",
-                }}
-              >
-                <QrCode style={{ width: 13, height: 13 }} />
-                <span>{isAr ? "رمز الاستجابة السريع (QR Code)" : "Code QR de Partage"}</span>
-              </div>
-
-              <h3
-                style={{
-                  fontSize: "15px",
-                  fontWeight: 900,
-                  color: "#ffffff",
-                  marginBottom: "4px",
-                }}
-              >
-                {isAr ? "امسح الرمز لمشاركة البطاقة فوراً" : "Scannez pour Enregistrer"}
-              </h3>
-
-              <p
-                style={{
-                  fontSize: "11.5px",
-                  color: "#94a3b8",
-                  maxWidth: "320px",
-                  margin: "0 auto 16px auto",
-                  lineHeight: "1.4",
-                }}
-              >
-                {isAr
-                  ? "امسح الرمز بكاميرا هاتفك لفتح البطاقة وحفظ جهة الاتصال مباشرة"
-                  : "Scannez avec votre téléphone pour ouvrir et enregistrer le contact"}
-              </p>
-
-              {/* QR Image Container with Luxury Glow */}
-              <div
-                style={{
-                  position: "relative",
-                  display: "inline-block",
-                  padding: "12px",
-                  borderRadius: "22px",
-                  background: "#ffffff",
-                  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.7), 0 0 25px rgba(245, 158, 11, 0.25)",
-                  border: "2.5px solid rgba(245, 158, 11, 0.45)",
-                  cursor: "pointer",
-                  transition: "transform 0.25s ease",
-                }}
-                onClick={() => setQrModalOpen(true)}
-                title={isAr ? "اضغط للتكبير" : "Agrandir"}
-              >
-                <div
-                  style={{
-                    position: "relative",
-                    width: "160px",
-                    height: "160px",
-                  }}
-                >
-                  <Image
-                    src={profile.qrCodeImage || "/uploads/qr.png"}
-                    alt="QR Code"
-                    fill
-                    style={{ objectFit: "contain" }}
-                  />
-                </div>
-
-                {/* Bottom badge on QR */}
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "-10px",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
-                    color: "#0c1222",
-                    fontSize: "10px",
-                    fontWeight: 900,
-                    padding: "2px 10px",
-                    borderRadius: "10px",
-                    whiteSpace: "nowrap",
-                    boxShadow: "0 4px 10px rgba(0,0,0,0.5)",
-                  }}
-                >
-                  ⚡ SCAN ME
-                </div>
-              </div>
-
-              {/* Action Buttons below QR */}
-              <div
-                style={{
-                  marginTop: "20px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "10px",
-                }}
-              >
-                <a
-                  href={profile.qrCodeImage || "/uploads/qr.png"}
-                  download="bilal-electronique-qr.png"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: "8px 14px",
-                    borderRadius: "14px",
-                    background: "rgba(255, 255, 255, 0.08)",
-                    border: "1px solid rgba(255, 255, 255, 0.12)",
-                    color: "#f1f5f9",
-                    fontSize: "12px",
-                    fontWeight: 700,
-                    textDecoration: "none",
-                  }}
-                >
-                  <Download style={{ width: 14, height: 14, color: "#60a5fa" }} />
-                  <span>{isAr ? "تحميل الرمز" : "Télécharger"}</span>
-                </a>
-
-                <button
-                  onClick={() => setQrModalOpen(true)}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: "8px 14px",
-                    borderRadius: "14px",
-                    background: "rgba(37, 99, 235, 0.18)",
-                    border: "1px solid rgba(37, 99, 235, 0.35)",
-                    color: "#93c5fd",
-                    fontSize: "12px",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                  }}
-                >
-                  <Maximize2 style={{ width: 14, height: 14 }} />
-                  <span>{isAr ? "تكبير الرمز" : "Plein écran"}</span>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* 9. Footer */}
-          <footer
-            style={{
-              paddingTop: "16px",
-              paddingBottom: "12px",
-              textAlign: "center",
-              display: "flex",
-              flexDirection: "column",
-              gap: "8px",
-            }}
-          >
-            {/* Quick Social Icons in Footer */}
-            {(hasInstagram || hasFacebook || profile.whatsapp || profile.phone) && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "10px",
-                  marginBottom: "4px",
-                }}
-              >
-                {hasInstagram && (
-                  <a
-                    id="footer-instagram-link"
-                    href={instagramUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="Instagram"
-                    style={{
-                      width: "36px",
-                      height: "36px",
-                      borderRadius: "50%",
-                      background: "rgba(225, 48, 108, 0.15)",
-                      border: "1px solid rgba(225, 48, 108, 0.35)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "#f43f5e",
-                      transition: "transform 0.2s",
-                    }}
-                  >
-                    <InstagramGradientIcon size={20} />
-                  </a>
-                )}
-
-                {hasFacebook && (
-                  <a
-                    id="footer-facebook-link"
-                    href={facebookUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="Facebook"
-                    style={{
-                      width: "36px",
-                      height: "36px",
-                      borderRadius: "50%",
-                      background: "rgba(24, 119, 242, 0.15)",
-                      border: "1px solid rgba(24, 119, 242, 0.35)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "#60a5fa",
-                      transition: "transform 0.2s",
-                    }}
-                  >
-                    <FacebookRoundIcon size={20} />
-                  </a>
-                )}
-
-                <a
-                  id="footer-whatsapp-link"
-                  href={getWhatsAppUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="WhatsApp"
-                  style={{
-                    width: "36px",
-                    height: "36px",
-                    borderRadius: "50%",
-                    background: "rgba(16, 185, 129, 0.15)",
-                    border: "1px solid rgba(16, 185, 129, 0.35)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#25D366",
-                    transition: "transform 0.2s",
-                  }}
-                >
-                  <WhatsAppIcon size={18} />
-                </a>
-
-                <a
-                  id="footer-phone-link"
-                  href={`tel:${profile.phone}`}
-                  title={isAr ? "اتصال" : "Appeler"}
-                  style={{
-                    width: "36px",
-                    height: "36px",
-                    borderRadius: "50%",
-                    background: "rgba(37, 99, 235, 0.15)",
-                    border: "1px solid rgba(37, 99, 235, 0.35)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#60a5fa",
-                  }}
-                >
-                  <Phone style={{ width: 16, height: 16 }} />
-                </a>
-              </div>
-            )}
-
-            <p style={{ fontSize: "11px", color: "#64748b" }}>
-              © {new Date().getFullYear()} {profile.businessName[lang]} - {profile.city[lang]}
-            </p>
-          </footer>
-        </div>
-      </main>
-
-      {/* Floating Bottom Dock for Mobile Smartphones */}
-      <div className="mobile-bottom-dock">
-        <div className="dock-content">
-          <a
-            id="float-call-btn"
-            href={`tel:${profile.phone}`}
-            className="btn-nfc-call"
-            style={{ flex: 1, padding: "11px 14px", borderRadius: "16px", fontSize: "13px" }}
-          >
-            <Phone className="anim-icon-phone" style={{ width: 16, height: 16 }} />
-            <span>{profile.phoneDisplay}</span>
-          </a>
-
-          <a
-            id="float-whatsapp-btn"
+          {/* WhatsApp */}
+          <motion.a
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.95 }}
             href={getWhatsAppUrl()}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-nfc-whatsapp"
-            style={{ flex: 1, padding: "11px 14px", borderRadius: "16px", fontSize: "13px" }}
-          >
-            <WhatsAppIcon className="anim-icon-whatsapp" size={17} />
-            <span>{isAr ? "واتساب مباشر" : "WhatsApp"}</span>
-          </a>
-        </div>
-      </div>
-
-      {/* Full-Screen Poster Zoom Lightbox */}
-      {imageModalOpen && profile.posterImage && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 100,
-            backgroundColor: "rgba(0, 0, 0, 0.94)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "16px",
-          }}
-          onClick={() => setImageModalOpen(false)}
-        >
-          <div
             style={{
-              position: "relative",
-              width: "100%",
-              maxWidth: "480px",
-              height: "78vh",
-              maxHeight: "620px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "6px",
+              padding: "11px 8px",
+              borderRadius: "14px",
+              background: "rgba(37, 211, 102, 0.18)",
+              border: "1px solid rgba(37, 211, 102, 0.35)",
+              color: "#25D366",
+              fontSize: "12px",
+              fontWeight: 700,
+              textDecoration: "none",
             }}
-            onClick={(e) => e.stopPropagation()}
           >
-            {/* Close button */}
-            <button
-              id="close-image-modal"
-              onClick={() => setImageModalOpen(false)}
-              style={{
-                position: "absolute",
-                top: "-45px",
-                right: isAr ? "0" : "auto",
-                left: !isAr ? "0" : "auto",
-                width: "36px",
-                height: "36px",
-                borderRadius: "50%",
-                background: "rgba(255, 255, 255, 0.15)",
-                border: "none",
-                color: "#ffffff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-              }}
-            >
-              <X style={{ width: 20, height: 20 }} />
-            </button>
+            <WhatsAppIcon size={14} />
+            <span>WhatsApp</span>
+          </motion.a>
 
-            {/* High Res Container */}
-            <div
+          {/* Email */}
+          <motion.a
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.95 }}
+            href={`mailto:${emailAddress}`}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "6px",
+              padding: "11px 8px",
+              borderRadius: "14px",
+              background: "rgba(229, 192, 110, 0.18)",
+              border: "1px solid rgba(229, 192, 110, 0.35)",
+              color: "#e5c06e",
+              fontSize: "12px",
+              fontWeight: 700,
+              textDecoration: "none",
+            }}
+          >
+            <Mail style={{ width: 14, height: 14 }} />
+            <span>Email</span>
+          </motion.a>
+
+          {/* Save vCard icon trigger */}
+          <motion.button
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={handleSaveContact}
+            aria-label="Save vCard"
+            style={{
+              width: "44px",
+              height: "44px",
+              borderRadius: "14px",
+              background: "var(--gold-gradient)",
+              color: "#040d0b",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              border: "none",
+              cursor: "pointer",
+              boxShadow: "0 4px 14px rgba(229, 192, 110, 0.45)",
+            }}
+          >
+            <Download style={{ width: 19, height: 19 }} />
+          </motion.button>
+        </div>
+      </motion.div>
+
+      {/* ==========================================================================
+          MODALS WITH ANIMATE PRESENCE
+          ========================================================================== */}
+      <AnimatePresence>
+        {/* QR CODE MODAL */}
+        {qrModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="modal-overlay"
+            onClick={() => setQrModalOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", stiffness: 350, damping: 25 }}
+              className="modal-content"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <QrCode style={{ width: 20, height: 20, color: "#e5c06e" }} />
+                  <h3 style={{ fontSize: "16px", fontWeight: 800, color: "#ffffff" }}>
+                    QR Code
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setQrModalOpen(false)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    color: "#94a3b8",
+                    cursor: "pointer",
+                    padding: "4px",
+                  }}
+                >
+                  <X style={{ width: 20, height: 20 }} />
+                </button>
+              </div>
+
+              {/* QR Card */}
+              <div
+                style={{
+                  background: "#ffffff",
+                  padding: "18px",
+                  borderRadius: "20px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 16px",
+                  width: "230px",
+                  height: "230px",
+                  boxShadow: "0 10px 25px rgba(0, 0, 0, 0.4)",
+                }}
+              >
+                <img
+                  src={qrDisplayUrl}
+                  alt="QR Code Ferdaous TAZI"
+                  style={{ width: "190px", height: "190px", objectFit: "contain" }}
+                />
+              </div>
+
+              <div style={{ textAlign: "center", marginBottom: "16px" }}>
+                <div style={{ fontSize: "15px", fontWeight: 800, color: "#ffffff" }}>
+                  {getName()}
+                </div>
+                <div style={{ fontSize: "12px", color: "#e5c06e" }}>
+                  {getTitle()} · {getOrg()}
+                </div>
+                <div
+                  style={{
+                    fontSize: "11px",
+                    color: "#94a3b8",
+                    marginTop: "6px",
+                    maxWidth: "260px",
+                    margin: "6px auto 0",
+                    wordBreak: "break-all",
+                  }}
+                >
+                  <span style={{ color: "#e5c06e" }}>Destination : </span>
+                  {qrTargetLink}
+                </div>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleCopyLink}
+                  className="btn-gold-hero"
+                  style={{ width: "100%" }}
+                >
+                  {copied ? (
+                    <>
+                      <Check style={{ width: 17, height: 17 }} />
+                      <span>Lien Copié !</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy style={{ width: 17, height: 17 }} />
+                      <span>Copier le Lien Direct</span>
+                    </>
+                  )}
+                </motion.button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const downloadUrl =
+                      profile.qrCodeImage && profile.qrCodeImage.trim()
+                        ? profile.qrCodeImage
+                        : `https://api.qrserver.com/v1/create-qr-code/?size=600x600&color=040d0b&bgcolor=e5c06e&data=${encodeURIComponent(
+                            qrTargetLink
+                          )}`;
+                    const a = document.createElement("a");
+                    a.href = downloadUrl;
+                    a.download = "qr_code_ferdaous_tazi.png";
+                    a.target = "_blank";
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                  }}
+                  className="btn-glass-action"
+                  style={{ width: "100%", justifyContent: "center", fontSize: "12px", padding: "10px" }}
+                >
+                  <Download style={{ width: 15, height: 15, color: "#e5c06e" }} />
+                  <span>Télécharger le QR Code (PNG)</span>
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* SHARE MODAL */}
+        {shareModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="modal-overlay"
+            onClick={() => setShareModalOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", stiffness: 350, damping: 25 }}
+              className="modal-content"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Share2 style={{ width: 20, height: 20, color: "#e5c06e" }} />
+                  <h3 style={{ fontSize: "16px", fontWeight: 800, color: "#ffffff" }}>
+                    Partager la Carte
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setShareModalOpen(false)}
+                  style={{ background: "transparent", border: "none", color: "#94a3b8", cursor: "pointer" }}
+                >
+                  <X style={{ width: 20, height: 20 }} />
+                </button>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "16px" }}>
+                {/* WhatsApp Share */}
+                <motion.a
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
+                    `Ferdaous TAZI - Directrice executive REMESS : ${currentUrl}`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-glass-action"
+                  style={{ justifyContent: "flex-start", gap: "12px", color: "#25D366" }}
+                >
+                  <WhatsAppRoundIcon size={24} />
+                  <span style={{ color: "#ffffff" }}>WhatsApp</span>
+                </motion.a>
+
+                {/* LinkedIn Share */}
+                <motion.a
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-glass-action"
+                  style={{ justifyContent: "flex-start", gap: "12px" }}
+                >
+                  <LinkedInRoundIcon size={24} />
+                  <span style={{ color: "#ffffff" }}>LinkedIn</span>
+                </motion.a>
+
+                {/* Email Share */}
+                <motion.a
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  href={`mailto:?subject=${encodeURIComponent(
+                    `Contact : Ferdaous TAZI - REMESS`
+                  )}&body=${encodeURIComponent(
+                    `Bonjour,\n\nVoici le contact de Mme Ferdaous TAZI (Directrice executive REMESS) :\n${currentUrl}\n\nCordialement.`
+                  )}`}
+                  className="btn-glass-action"
+                  style={{ justifyContent: "flex-start", gap: "12px" }}
+                >
+                  <div
+                    style={{
+                      width: "24px",
+                      height: "24px",
+                      borderRadius: "50%",
+                      background: "#e5c06e",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#040d0b",
+                    }}
+                  >
+                    <Mail style={{ width: 14, height: 14 }} />
+                  </div>
+                  <span style={{ color: "#ffffff" }}>Email</span>
+                </motion.a>
+              </div>
+
+              {/* Copy direct link */}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleCopyLink}
+                className="btn-gold-hero"
+              >
+                {copied ? (
+                  <>
+                    <Check style={{ width: 17, height: 17 }} />
+                    <span>Lien Copié !</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy style={{ width: 17, height: 17 }} />
+                    <span>Copier le Lien</span>
+                  </>
+                )}
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* FULLSCREEN PORTRAIT PREVIEW */}
+        {imageModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="modal-overlay"
+            onClick={() => setImageModalOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.85, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 350, damping: 25 }}
               style={{
                 position: "relative",
+                maxWidth: "420px",
                 width: "100%",
-                height: "100%",
-                borderRadius: "20px",
+                aspectRatio: "1/1",
+                borderRadius: "26px",
                 overflow: "hidden",
-                border: "1.5px solid rgba(245, 158, 11, 0.4)",
-                backgroundColor: "#030712",
-                boxShadow: "0 25px 60px rgba(0,0,0,0.9)",
+                border: "2px solid #e5c06e",
+                boxShadow: "0 25px 60px rgba(0,0,0,0.85)",
               }}
+              onClick={(e) => e.stopPropagation()}
             >
               <Image
-                src={profile.posterImage}
-                alt={profile.businessName[lang]}
+                src={profile.posterImage || "/uploads/ferdaous_tazi.jpg"}
+                alt={getName()}
                 fill
-                style={{ objectFit: "contain" }}
-                priority
+                style={{ objectFit: "cover" }}
               />
-            </div>
-
-            {/* Quick Action under lightbox */}
-            <div
-              style={{
-                marginTop: "12px",
-                display: "flex",
-                gap: "10px",
-                justifyContent: "center",
-              }}
-            >
-              <a
-                href={getWhatsAppUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-nfc-whatsapp"
-                style={{ padding: "10px 18px", fontSize: "13px" }}
-              >
-                <WhatsAppIcon className="anim-icon-whatsapp" size={17} />
-                <span>{isAr ? "تواصل حول العرض" : "Commander"}</span>
-              </a>
               <button
                 onClick={() => setImageModalOpen(false)}
                 style={{
-                  padding: "10px 18px",
-                  borderRadius: "16px",
-                  background: "rgba(255, 255, 255, 0.1)",
-                  border: "1px solid rgba(255, 255, 255, 0.15)",
-                  color: "#cbd5e1",
-                  fontSize: "13px",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                }}
-              >
-                {isAr ? "إغلاق" : "Fermer"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Full-Screen QR Lightbox Modal */}
-      {qrModalOpen && (profile.qrCodeImage || "/uploads/qr.png") && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 100,
-            backgroundColor: "rgba(0, 0, 0, 0.94)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "20px",
-          }}
-          onClick={() => setQrModalOpen(false)}
-        >
-          <div
-            style={{
-              position: "relative",
-              width: "100%",
-              maxWidth: "360px",
-              textAlign: "center",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close button */}
-            <button
-              onClick={() => setQrModalOpen(false)}
-              style={{
-                position: "absolute",
-                top: "-45px",
-                right: isAr ? "0" : "auto",
-                left: !isAr ? "0" : "auto",
-                width: "36px",
-                height: "36px",
-                borderRadius: "50%",
-                background: "rgba(255, 255, 255, 0.15)",
-                border: "none",
-                color: "#ffffff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-              }}
-            >
-              <X style={{ width: 20, height: 20 }} />
-            </button>
-
-            <div
-              style={{
-                position: "relative",
-                width: "260px",
-                height: "260px",
-                margin: "0 auto",
-                padding: "16px",
-                borderRadius: "24px",
-                backgroundColor: "#ffffff",
-                border: "2px solid rgba(245, 158, 11, 0.5)",
-                boxShadow: "0 25px 60px rgba(0,0,0,0.9), 0 0 35px rgba(245, 158, 11, 0.3)",
-              }}
-            >
-              <div style={{ position: "relative", width: "100%", height: "100%" }}>
-                <Image
-                  src={profile.qrCodeImage || "/uploads/qr.png"}
-                  alt="QR Code High Res"
-                  fill
-                  style={{ objectFit: "contain" }}
-                  priority
-                />
-              </div>
-            </div>
-
-            <p style={{ marginTop: "16px", fontSize: "15px", fontWeight: 900, color: "#ffffff" }}>
-              {profile.businessName[lang]}
-            </p>
-            <p style={{ fontSize: "12px", color: "#fbbf24", marginTop: "3px" }}>
-              {isAr ? "امسح الرمز بكاميرا الهاتف لمشاركة وحفظ البطاقة" : "Scannez avec l'appareil photo"}
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Share Modal */}
-      {shareModalOpen && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 100,
-            backgroundColor: "rgba(0, 0, 0, 0.85)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "16px",
-          }}
-          onClick={() => setShareModalOpen(false)}
-        >
-          <div
-            className="luxury-card"
-            style={{
-              width: "100%",
-              maxWidth: "360px",
-              padding: "24px 20px",
-              textAlign: "center",
-              position: "relative",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setShareModalOpen(false)}
-              style={{
-                position: "absolute",
-                top: "14px",
-                right: isAr ? "14px" : "auto",
-                left: !isAr ? "14px" : "auto",
-                background: "none",
-                border: "none",
-                color: "#94a3b8",
-                cursor: "pointer",
-              }}
-            >
-              <X style={{ width: 18, height: 18 }} />
-            </button>
-
-            <div
-              style={{
-                width: "48px",
-                height: "48px",
-                borderRadius: "16px",
-                background: "rgba(37, 99, 235, 0.2)",
-                color: "#60a5fa",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                margin: "0 auto 12px auto",
-              }}
-            >
-              <Share2 style={{ width: 22, height: 22 }} />
-            </div>
-
-            <h3 style={{ fontSize: "16px", fontWeight: 800, color: "#ffffff", marginBottom: "6px" }}>
-              {isAr ? "مشاركة البطاقة الذكية" : "Partager la Carte"}
-            </h3>
-
-            <p style={{ fontSize: "12px", color: "#94a3b8", marginBottom: "16px" }}>
-              {isAr
-                ? "انسخ الرابط لمشاركته مع زبنائك في واتساب ومواقع التواصل"
-                : "Copiez le lien pour le partager avec vos clients"}
-            </p>
-
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "8px 12px",
-                borderRadius: "14px",
-                background: "#030612",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-              }}
-            >
-              <input
-                type="text"
-                readOnly
-                value={typeof window !== "undefined" ? window.location.href : ""}
-                style={{
-                  flex: 1,
-                  background: "transparent",
-                  border: "none",
-                  outline: "none",
-                  color: "#cbd5e1",
-                  fontSize: "11px",
-                  fontFamily: "monospace",
-                }}
-              />
-              <button
-                id="copy-link-btn"
-                onClick={handleCopyLink}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  padding: "6px 12px",
-                  borderRadius: "10px",
-                  background: "#2563eb",
+                  position: "absolute",
+                  top: "12px",
+                  right: "12px",
+                  width: "36px",
+                  height: "36px",
+                  borderRadius: "50%",
+                  background: "rgba(0,0,0,0.65)",
                   border: "none",
                   color: "#ffffff",
-                  fontSize: "11px",
-                  fontWeight: 800,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                   cursor: "pointer",
                 }}
               >
-                {copied ? <Check style={{ width: 12, height: 12 }} /> : <Copy style={{ width: 12, height: 12 }} />}
-                <span>{copied ? (isAr ? "تم" : "Copié") : (isAr ? "نسخ" : "Copier")}</span>
+                <X style={{ width: 20, height: 20 }} />
               </button>
-            </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

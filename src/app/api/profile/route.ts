@@ -29,7 +29,7 @@ export async function POST(req: Request) {
 
     if (!body || !body.businessName) {
       return NextResponse.json(
-        { success: false, message: "بيانات غير صالحة" },
+        { success: false, message: "Données de profil non valides" },
         { status: 400 }
       );
     }
@@ -41,15 +41,15 @@ export async function POST(req: Request) {
     const result = await saveProfile(cleanBody, { githubToken });
     const capabilities = getStorageCapabilities();
 
-    let userMsg = "✓ تم حفظ التعديلات بنجاح في ملف profile.json";
+    let userMsg = "✓ Modifications enregistrées avec succès dans profile.json";
     if (result.storageType === "vercel-kv") {
-      userMsg = "✓ تم الحفظ السحابي في Vercel KV وتحديث جميع الأجهزة فوراً!";
+      userMsg = "✓ Sauvegarde cloud Vercel KV réussie et synchronisée en temps réel !";
     } else if (result.storageType === "vercel-blob") {
-      userMsg = "✓ تم الحفظ السحابي في Vercel Blob وتحديث جميع الأجهزة فوراً!";
+      userMsg = "✓ Sauvegarde cloud Vercel Blob réussie et synchronisée en temps réel !";
     } else if (result.storageType === "github") {
-      userMsg = "✓ تم حفظ التعديلات وإرسال Commit تلقائي إلى GitHub لمزامنة جميع الأجهزة!";
+      userMsg = "✓ Modifications enregistrées et synchronisées avec le dépôt GitHub !";
     } else if (result.isReadOnly) {
-      userMsg = "تم الحفظ محلياً في الجلسة. لتحديث باقي الأجهزة تلقائياً، قم بتفعيل Vercel Storage بضغطة زر واحدة.";
+      userMsg = "Modifications enregistrées localement dans votre session.";
     }
 
     return NextResponse.json(
