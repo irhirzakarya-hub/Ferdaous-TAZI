@@ -103,10 +103,12 @@ export default function AdminPage() {
           cleanData.qrCodeImage = cleanData.qrCodeImage ?? "";
 
           if (
-            !cleanData.posterImage ||
-            cleanData.posterImage.includes("img-1792") ||
-            cleanData.posterImage.includes("poster.png") ||
-            !cleanData.posterImage.includes("ferdaous")
+            cleanData.posterImage &&
+            (cleanData.posterImage.includes("img-1792") ||
+              cleanData.posterImage.includes("poster.png") ||
+              (!cleanData.posterImage.includes("ferdaous") &&
+                !cleanData.posterImage.includes("blob.vercel-storage.com") &&
+                !cleanData.posterImage.startsWith("data:image/")))
           ) {
             cleanData.posterImage = "/uploads/ferdaous_tazi.jpg";
           }
@@ -182,7 +184,7 @@ export default function AdminPage() {
             : (profile.organization as any)?.fr || "REMESS",
         qrCodeUrl: typeof profile.qrCodeUrl === "string" ? profile.qrCodeUrl.trim() : "",
         qrCodeImage: profile.qrCodeImage || "",
-        posterImage: profile.posterImage || "/uploads/ferdaous_tazi.jpg",
+        posterImage: typeof profile.posterImage === "string" ? profile.posterImage.trim() : "",
       };
 
       const res = await fetch("/api/profile", {
@@ -1117,7 +1119,7 @@ export default function AdminPage() {
             </motion.div>
           )}
 
-          {/* TAB 3: MEDIA */}
+          {/* TAB: MEDIA / PHOTO */}
           {activeTab === "media" && (
             <motion.div
               key="media"
@@ -1128,50 +1130,147 @@ export default function AdminPage() {
               className="luxury-card"
               style={{ padding: "26px 22px" }}
             >
-              <h3 style={{ fontSize: "17px", fontWeight: 800, color: "#ffffff", marginBottom: "18px" }}>
+              <h3 style={{ fontSize: "17px", fontWeight: 800, color: "#ffffff", marginBottom: "8px" }}>
                 Photo de Profil Officielle
               </h3>
+              <p style={{ fontSize: "12px", color: "#94a3b8", marginBottom: "20px" }}>
+                Gérez la photo affichée au sommet de votre carte digitale. Si vous supprimez la photo, le cadre disparaît complètement et la carte s'affiche en mode épuré.
+              </p>
 
-              <div style={{ maxWidth: "340px", margin: "0 auto", textAlign: "center", padding: "24px", background: "rgba(4, 13, 11, 0.7)", borderRadius: "20px", border: "1px solid rgba(229, 192, 110, 0.2)" }}>
-                <div
-                  style={{
-                    position: "relative",
-                    width: "140px",
-                    height: "140px",
-                    borderRadius: "50%",
-                    overflow: "hidden",
-                    margin: "0 auto 16px",
-                    border: "3px solid #e5c06e",
-                    boxShadow: "0 0 20px rgba(229, 192, 110, 0.3)",
-                  }}
-                >
-                  <Image
-                    src={profile.posterImage || "/uploads/ferdaous_tazi.jpg"}
-                    alt="Ferdaous TAZI"
-                    fill
-                    style={{ objectFit: "cover" }}
-                  />
-                </div>
+              <input
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                onChange={handleImageFileChange}
+              />
 
-                <input
-                  type="file"
-                  accept="image/*"
-                  ref={fileInputRef}
-                  style={{ display: "none" }}
-                  onChange={handleImageFileChange}
-                />
+              <div
+                style={{
+                  maxWidth: "380px",
+                  margin: "0 auto",
+                  textAlign: "center",
+                  padding: "26px 20px",
+                  background: "rgba(4, 13, 11, 0.7)",
+                  borderRadius: "20px",
+                  border: "1px solid rgba(229, 192, 110, 0.2)",
+                }}
+              >
+                {profile.posterImage && profile.posterImage.trim() ? (
+                  <>
+                    <div
+                      style={{
+                        position: "relative",
+                        width: "140px",
+                        height: "140px",
+                        borderRadius: "50%",
+                        overflow: "hidden",
+                        margin: "0 auto 18px",
+                        border: "3px solid #e5c06e",
+                        boxShadow: "0 0 20px rgba(229, 192, 110, 0.3)",
+                      }}
+                    >
+                      <Image
+                        src={profile.posterImage}
+                        alt="Ferdaous TAZI"
+                        fill
+                        style={{ objectFit: "cover" }}
+                      />
+                    </div>
 
-                <motion.button
-                  whileHover={{ scale: 1.04 }}
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploadingImage}
-                  className="btn-gold-hero"
-                  style={{ width: "auto", padding: "10px 20px", fontSize: "12px" }}
-                >
-                  <Upload style={{ width: 14, height: 14 }} />
-                  <span>{uploadingImage ? "Téléchargement..." : "Changer la Photo"}</span>
-                </motion.button>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "10px", alignItems: "center" }}>
+                      <motion.button
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploadingImage}
+                        className="btn-gold-hero"
+                        style={{ width: "100%", justifyContent: "center", fontSize: "12.5px", padding: "10px 16px" }}
+                      >
+                        <Upload style={{ width: 15, height: 15 }} />
+                        <span>{uploadingImage ? "Téléversement..." : "Changer la Photo"}</span>
+                      </motion.button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setProfile({ ...profile, posterImage: "" });
+                          showToast("info", "Photo retirée ! Le cadre photo sera masqué sur la carte. Cliquez sur Enregistrer.");
+                        }}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "6px",
+                          width: "100%",
+                          padding: "9px 16px",
+                          borderRadius: "12px",
+                          background: "rgba(239, 68, 68, 0.15)",
+                          border: "1px solid rgba(239, 68, 68, 0.35)",
+                          color: "#f87171",
+                          fontSize: "12px",
+                          fontWeight: 700,
+                          cursor: "pointer",
+                        }}
+                      >
+                        <Trash2 style={{ width: 14, height: 14 }} />
+                        <span>Supprimer la Photo (Masquer le cadre)</span>
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ padding: "10px 0" }}>
+                    <div
+                      style={{
+                        width: "80px",
+                        height: "80px",
+                        borderRadius: "50%",
+                        margin: "0 auto 14px",
+                        background: "rgba(229, 192, 110, 0.08)",
+                        border: "1px dashed rgba(229, 192, 110, 0.35)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <ImageIcon style={{ width: 34, height: 34, color: "#e5c06e" }} />
+                    </div>
+
+                    <span style={{ fontSize: "14px", fontWeight: 700, color: "#ffffff", display: "block", marginBottom: "6px" }}>
+                      Aucune Photo de Profil
+                    </span>
+                    <p style={{ fontSize: "11.5px", color: "#94a3b8", marginBottom: "18px", lineHeight: 1.5 }}>
+                      La carte s'affiche actuellement en <strong>mode épuré</strong> : le cadre photo est totalement masqué et le nom s'affiche directement avec le badge vérifié.
+                    </p>
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                      <motion.button
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploadingImage}
+                        className="btn-gold-hero"
+                        style={{ width: "100%", justifyContent: "center", fontSize: "12.5px", padding: "10px 16px" }}
+                      >
+                        <Upload style={{ width: 15, height: 15 }} />
+                        <span>{uploadingImage ? "Téléversement..." : "Ajouter une Photo"}</span>
+                      </motion.button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setProfile({ ...profile, posterImage: "/uploads/ferdaous_tazi.jpg" });
+                          showToast("info", "Photo officielle restaurée ! Cliquez sur Enregistrer.");
+                        }}
+                        className="btn-glass-action"
+                        style={{ width: "100%", justifyContent: "center", fontSize: "12px", padding: "9px 14px" }}
+                      >
+                        <RefreshCw style={{ width: 14, height: 14, color: "#e5c06e" }} />
+                        <span>Restaurer la Photo de Ferdaous TAZI</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}

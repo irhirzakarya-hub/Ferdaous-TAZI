@@ -257,10 +257,12 @@ export default function HomePage() {
           sanitized.qrCodeImage = sanitized.qrCodeImage ?? "";
 
           if (
-            !sanitized.posterImage ||
-            sanitized.posterImage.includes("img-1792") ||
-            sanitized.posterImage.includes("poster.png") ||
-            !sanitized.posterImage.includes("ferdaous")
+            sanitized.posterImage &&
+            (sanitized.posterImage.includes("img-1792") ||
+              sanitized.posterImage.includes("poster.png") ||
+              (!sanitized.posterImage.includes("ferdaous") &&
+                !sanitized.posterImage.includes("blob.vercel-storage.com") &&
+                !sanitized.posterImage.startsWith("data:image/")))
           ) {
             sanitized.posterImage = "/uploads/ferdaous_tazi.jpg";
           }
@@ -541,50 +543,52 @@ export default function HomePage() {
                   textAlign: "center",
                 }}
               >
-                {/* Rotating Halo Portrait Avatar */}
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="avatar-halo-ring"
-                  style={{ marginBottom: "18px", cursor: "pointer" }}
-                  onClick={() => setImageModalOpen(true)}
-                >
-                  <div
-                    style={{
-                      position: "relative",
-                      width: "128px",
-                      height: "128px",
-                      borderRadius: "50%",
-                      overflow: "hidden",
-                      backgroundColor: "#071714",
-                      zIndex: 1,
-                    }}
+                {/* Rotating Halo Portrait Avatar (Only if image is present) */}
+                {profile.posterImage && profile.posterImage.trim() ? (
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="avatar-halo-ring"
+                    style={{ marginBottom: "18px", cursor: "pointer" }}
+                    onClick={() => setImageModalOpen(true)}
                   >
-                    <Image
-                      src={profile.posterImage || "/uploads/ferdaous_tazi.jpg"}
-                      alt={getName()}
-                      fill
-                      sizes="140px"
-                      priority
-                      style={{ objectFit: "cover" }}
-                    />
-                  </div>
+                    <div
+                      style={{
+                        position: "relative",
+                        width: "128px",
+                        height: "128px",
+                        borderRadius: "50%",
+                        overflow: "hidden",
+                        backgroundColor: "#071714",
+                        zIndex: 1,
+                      }}
+                    >
+                      <Image
+                        src={profile.posterImage}
+                        alt={getName()}
+                        fill
+                        sizes="140px"
+                        priority
+                        style={{ objectFit: "cover" }}
+                      />
+                    </div>
 
-                  {/* Verified Badge on avatar */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: "4px",
-                      right: "4px",
-                      background: "#040d0b",
-                      borderRadius: "50%",
-                      padding: "3px",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.7)",
-                      zIndex: 3,
-                    }}
-                  >
-                    <VerifiedBadge size={25} />
-                  </div>
-                </motion.div>
+                    {/* Verified Badge on avatar */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        bottom: "4px",
+                        right: "4px",
+                        background: "#040d0b",
+                        borderRadius: "50%",
+                        padding: "3px",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.7)",
+                        zIndex: 3,
+                      }}
+                    >
+                      <VerifiedBadge size={25} />
+                    </div>
+                  </motion.div>
+                ) : null}
 
                 {/* Name */}
                 <motion.h1
@@ -596,9 +600,15 @@ export default function HomePage() {
                     color: "#ffffff",
                     lineHeight: 1.2,
                     marginBottom: "8px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    flexWrap: "wrap",
                   }}
                 >
-                  {getName()}
+                  <span>{getName()}</span>
+                  {(!profile.posterImage || !profile.posterImage.trim()) && <VerifiedBadge size={24} />}
                 </motion.h1>
 
                 {/* Directrice executive field directly under name */}
@@ -1299,7 +1309,7 @@ export default function HomePage() {
         )}
 
         {/* FULLSCREEN PORTRAIT PREVIEW */}
-        {imageModalOpen && (
+        {imageModalOpen && profile.posterImage && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
