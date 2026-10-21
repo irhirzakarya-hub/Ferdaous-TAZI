@@ -78,7 +78,7 @@ export default function AdminPage() {
           }
 
           // Strict sanitization for Ferdaous TAZI
-          const cleanData = { ...data };
+          let cleanData = { ...data };
           cleanData.businessName =
             typeof cleanData.businessName === "string"
               ? cleanData.businessName
@@ -104,11 +104,23 @@ export default function AdminPage() {
 
           if (
             cleanData.posterImage &&
-            (cleanData.posterImage.includes("ferdaous_tazi") ||
+            (cleanData.posterImage === "/uploads/ferdaous_tazi.jpg" ||
               cleanData.posterImage.includes("img-1792") ||
               cleanData.posterImage.includes("poster.png"))
           ) {
             cleanData.posterImage = "";
+          }
+
+          const localOverride = localStorage.getItem("ferdaous_profile_override");
+          if (localOverride) {
+            try {
+              const parsed = JSON.parse(localOverride);
+              if (parsed && typeof parsed === "object") {
+                cleanData = { ...cleanData, ...parsed };
+              }
+            } catch (e) {
+              console.error(e);
+            }
           }
 
           setProfile(cleanData);
@@ -215,7 +227,7 @@ export default function AdminPage() {
     setUploadingImage(true);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("prefix", "ferdaous_tazi");
+    formData.append("prefix", "avatar");
     formData.append("oldImage", profile.posterImage || "");
 
     try {

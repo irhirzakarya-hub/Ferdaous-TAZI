@@ -64,7 +64,7 @@ export function sanitizeProfile(data: any): ProfileData {
   let posterImage = typeof data.posterImage === "string" ? data.posterImage.trim() : "";
   if (
     posterImage &&
-    (posterImage.includes("ferdaous_tazi") ||
+    (posterImage === "/uploads/ferdaous_tazi.jpg" ||
       posterImage.includes("img-1792") ||
       posterImage.includes("poster.png"))
   ) {

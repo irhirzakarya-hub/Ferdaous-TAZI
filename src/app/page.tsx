@@ -256,7 +256,7 @@ export default function HomePage() {
 
           if (
             sanitized.posterImage &&
-            (sanitized.posterImage.includes("ferdaous_tazi") ||
+            (sanitized.posterImage === "/uploads/ferdaous_tazi.jpg" ||
               sanitized.posterImage.includes("img-1792") ||
               sanitized.posterImage.includes("poster.png"))
           ) {
@@ -270,7 +270,7 @@ export default function HomePage() {
             if (localOverride) {
               try {
                 const parsed = JSON.parse(localOverride);
-                if (parsed.phone && !parsed.phone.includes("062078")) {
+                if (parsed && typeof parsed === "object") {
                   setProfile((prev) => ({ ...prev, ...parsed }));
                 }
               } catch (e) {
